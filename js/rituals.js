@@ -30,33 +30,27 @@ const RitualsApp = {
     },
 
     // --- Initialization ---
+    isReady: false,
     init: function() {
         console.log("RitualsApp Initializing...");
         this.injectInitialHTML(); // Inject static HTML
         this.cacheDomElements(); // Cache elements AFTER injection
-        this.loadData(); // Load rituals, history, settings
         this.addEventListeners(); // Add listeners AFTER caching
-        this.updateDateDisplay(); // Set today's date
-        this.updateStreakCount(); // Display initial streak
-        // Check if Rituals is the active app on load (unlikely but for safety)
-        const isActiveOnInit = document.getElementById('app-rituals')?.classList.contains('active');
-        if (isActiveOnInit) {
-            this.switchToView('today'); // Start on Today view if active
-        } else {
-            this.currentView = 'today'; // Set default view state even if not visible initially
-            this.renderTodayView(); // Render initial state even if hidden, so data is ready
-        }
+        this.currentView = 'today'; // Always start on today
+        this.isReady = false;
+        this.loadData(); // Load rituals, history, settings (will set isReady=true at the end)
+        // Ne pas appeler de rendu ici !
         console.log("RitualsApp Initialized.");
     },
 
     /** Injects the static HTML structure for RitualsApp */
     injectInitialHTML: function() {
         const container = document.getElementById('app-rituals');
-        if (!container || container.innerHTML.trim() !== '') {
-            // Avoid re-injecting
+        if (!container) {
+            console.error("RitualsApp: Container #app-rituals not found!");
             return;
         }
-        // --- Copied HTML structure from previous step ---
+        // Always inject the HTML, even if the container is not empty
         container.innerHTML = `
             <div class="container mx-auto px-4 py-8 max-w-6xl">
                 <!-- Header -->
@@ -412,6 +406,16 @@ const RitualsApp = {
         };
         // Populate icon select options after caching the element
         this.populateIconSelect();
+        // Ajout d'un observer pour déclencher le rendu quand le conteneur devient visible ET isReady
+        if (this.dom.todayContent) {
+            const observer = new MutationObserver(() => {
+                if (!this.dom.todayContent.classList.contains('hidden') && this.isReady) {
+                    console.log("DEBUG: MutationObserver déclenche renderTodayView");
+                    this.renderTodayView();
+                }
+            });
+            observer.observe(this.dom.todayContent, { attributes: true, attributeFilter: ['class'] });
+        }
         console.log("RitualsApp DOM elements cached.");
     },
 
@@ -512,8 +516,16 @@ const RitualsApp = {
             if (Array.isArray(parsedRituals) && parsedRituals.every(r => r && r.id && r.name && r.category && r.icon !== undefined && r.active !== undefined)) {
                 this.rituals = parsedRituals;
             } else {
-                 if (savedRituals) console.warn("Invalid rituals data structure found in localStorage, resetting to defaults.");
-                 this.rituals = this.getDefaultRituals();
+                if (savedRituals) console.warn("Invalid rituals data structure found in localStorage, resetting to defaults.");
+                this.rituals = this.getDefaultRituals();
+                this.saveData();
+                // Force UI refresh for both views, always
+                if (typeof this.renderTodayView === 'function') {
+                    this.renderTodayView();
+                }
+                if (typeof this.renderSettingsView === 'function') {
+                    this.renderSettingsView();
+                }
             }
         } catch (e) {
             console.error("Error parsing rituals data, using defaults.", e);
@@ -549,11 +561,35 @@ const RitualsApp = {
 
         this.cleanHistory(); // Ensure history integrity after loading
         console.log("RitualsApp data loaded.");
+        this.isReady = true;
+        // Si la vue active est visible, déclencher le rendu
+        if (this.currentView && this.dom && this.dom.todayContent && !this.dom.todayContent.classList.contains('hidden')) {
+            this.renderTodayView();
+        }
     },
 
     saveData: function() { /* ... (Identique à la version précédente) ... */ },
     cleanHistory: function() { /* ... (Identique à la version précédente) ... */ },
-    getDefaultRituals: function() { /* ... (Identique à la version précédente) ... */ },
+    getDefaultRituals: function() {
+        // Default rituals as described by the user
+        return [
+            { id: "meditation", name: "Méditation", category: "morning", icon: "meditation", active: true },
+            { id: "gratitude-journal", name: "Journal de gratitude", category: "morning", icon: "journal", active: true },
+            { id: "morning-exercise", name: "Exercice matinal", category: "morning", icon: "exercise", active: true },
+            { id: "drink-water", name: "Boire de l'eau", category: "morning", icon: "water", active: true },
+            { id: "day-planning", name: "Planification de la journée", category: "morning", icon: "list", active: true },
+            { id: "inspiring-reading", name: "Lecture inspirante", category: "afternoon", icon: "book", active: true },
+            { id: "mindful-lunch", name: "Pause déjeuner consciente", category: "afternoon", icon: "utensils", active: true },
+            { id: "digestive-walk", name: "Marche digestive", category: "afternoon", icon: "walking", active: true },
+            { id: "review-goals", name: "Révision des objectifs", category: "afternoon", icon: "bullseye", active: true },
+            { id: "digital-break", name: "Pause numérique", category: "afternoon", icon: "mobile-screen", active: true },
+            { id: "evening-journal", name: "Journal du soir", category: "evening", icon: "journal", active: true },
+            { id: "gentle-yoga", name: "Yoga doux", category: "evening", icon: "spa", active: true },
+            { id: "relaxing-reading", name: "Lecture relaxante", category: "evening", icon: "book-open", active: true },
+            { id: "gratitude-ritual", name: "Rituel de gratitude", category: "evening", icon: "heart", active: true },
+            { id: "prepare-tomorrow", name: "Préparation du lendemain", category: "evening", icon: "moon", active: true }
+        ];
+    },
     getDateKey: function(date = this.currentDate) { /* ... (Identique à la version précédente) ... */ },
     isValidDateKey: function(key) { /* ... (Identique à la version précédente) ... */ },
 
@@ -585,8 +621,15 @@ const RitualsApp = {
         // Show the selected content panel and render its content
         switch(viewName) {
             case 'today':
-                this.dom.todayContent?.classList.remove('hidden');
-                this.renderTodayView();
+                if (this.dom.todayContent) {
+                    this.dom.todayContent.classList.remove('hidden');
+                    // Forcer un reflow pour garantir que le conteneur est visible
+                    void this.dom.todayContent.offsetHeight;
+                }
+                // Rendu uniquement si les données sont prêtes
+                if (this.isReady && typeof this.renderTodayView === 'function') {
+                    this.renderTodayView();
+                }
                 break;
             case 'history':
                 this.dom.historyContent?.classList.remove('hidden');
@@ -603,16 +646,241 @@ const RitualsApp = {
         }
     },
 
-    renderTodayView: function() { /* ... (Identique à la version précédente) ... */ },
+    renderTodayView: function() {
+        console.log("RitualsApp.renderTodayView: rituals =", JSON.stringify(this.rituals));
+        console.log("DEBUG: currentView =", this.currentView, "todayContent.hidden =", this.dom.todayContent?.classList.contains('hidden'), "isReady =", this.isReady);
+        if (!this.dom.morningRituals || !this.dom.afternoonRituals || !this.dom.eveningRituals) return;
+        // Clear previous content
+        this.dom.morningRituals.innerHTML = '';
+        this.dom.afternoonRituals.innerHTML = '';
+        this.dom.eveningRituals.innerHTML = '';
+        // Remove debug/test styles
+        if (this.dom.morningRituals) {
+            this.dom.morningRituals.style.display = '';
+            this.dom.morningRituals.style.background = '';
+            this.dom.morningRituals.style.border = '';
+            this.dom.morningRituals.style.minHeight = '';
+            // Log computed style
+            const cs = window.getComputedStyle(this.dom.morningRituals);
+            console.log("DEBUG: morningRituals computed style", {
+                display: cs.display,
+                opacity: cs.opacity,
+                visibility: cs.visibility,
+                height: cs.height,
+                width: cs.width
+            });
+            if (this.dom.morningRituals.parentElement) {
+                const pcs = window.getComputedStyle(this.dom.morningRituals.parentElement);
+                console.log("DEBUG: parent computed style", {
+                    display: pcs.display,
+                    opacity: pcs.opacity,
+                    visibility: pcs.visibility,
+                    height: pcs.height,
+                    width: pcs.width
+                });
+            }
+        }
+        if (this.dom.todayContent) {
+            this.dom.todayContent.style.display = '';
+            this.dom.todayContent.style.background = '';
+            this.dom.todayContent.style.border = '';
+            this.dom.todayContent.style.minHeight = '200px';
+            this.dom.todayContent.style.overflow = 'visible';
+            this.dom.todayContent.style.position = 'relative';
+            this.dom.todayContent.style.zIndex = '1000';
+            // Ajout d'un bouton de debug pour forcer le rendu
+            if (!document.getElementById('force-render-btn')) {
+                const btn = document.createElement('button');
+                btn.id = 'force-render-btn';
+                btn.textContent = 'Forcer le rendu';
+                btn.style.position = 'fixed';
+                btn.style.top = '10px';
+                btn.style.right = '10px';
+                btn.style.zIndex = '999999';
+                btn.style.background = 'red';
+                btn.style.color = 'white';
+                btn.onclick = () => {
+                    console.log("DEBUG: Forçage manuel du rendu via bouton");
+                    this.renderTodayView();
+                    // Test ultime : injecter un contenu statique dans le body
+                    if (!document.getElementById('static-test-body')) {
+                        const div = document.createElement('div');
+                        div.id = 'static-test-body';
+                        div.textContent = 'STATIC TEST BODY';
+                        div.style.position = 'fixed';
+                        div.style.bottom = '10px';
+                        div.style.left = '10px';
+                        div.style.zIndex = '9999999';
+                        div.style.background = 'lime';
+                        div.style.color = 'black';
+                        div.style.fontWeight = 'bold';
+                        div.style.fontSize = '24px';
+                        document.body.appendChild(div);
+                    }
+                    // Test ultime : injecter un contenu statique dans le conteneur .container
+                    const container = document.querySelector('.container');
+                    if (container && !document.getElementById('static-test-container')) {
+                        const div2 = document.createElement('div');
+                        div2.id = 'static-test-container';
+                        div2.textContent = 'STATIC TEST CONTAINER';
+                        div2.style.background = 'orange';
+                        div2.style.color = 'black';
+                        div2.style.fontWeight = 'bold';
+                        div2.style.fontSize = '20px';
+                        div2.style.margin = '10px';
+                        container.insertBefore(div2, container.firstChild);
+                    }
+                };
+                document.body.appendChild(btn);
+            }
+        }
+        // Remove static test list
+        // (No need to add anything here, just let the dynamic rendering work)
+        // Group active rituals by category
+        const categories = {
+            morning: [],
+            afternoon: [],
+            evening: []
+        };
+        this.rituals.forEach(r => {
+            if (r.active && categories[r.category]) categories[r.category].push(r);
+        });
+        // Render rituals
+        renderRitualList(categories.morning, this.dom.morningRituals, this.iconMap);
+        renderRitualList(categories.afternoon, this.dom.afternoonRituals, this.iconMap);
+        renderRitualList(categories.evening, this.dom.eveningRituals, this.iconMap);
+        console.log("DEBUG: rendered", categories.morning.length, "morning rituals");
+        // FINAL TEST: forcibly set static content after all rendering
+        setTimeout(() => {
+            if (this.dom.morningRituals) {
+                this.dom.morningRituals.innerHTML = '<div style="color:orange;font-weight:bold;">FINAL STATIC TEST</div>';
+                setTimeout(() => {
+                    if (this.dom.morningRituals) {
+                        this.dom.morningRituals.innerHTML = '<div style="color:blue;font-weight:bold;position:fixed;top:10px;left:10px;z-index:99999;background:yellow;">STATIC TEST 500ms FIXED</div>';
+                        console.log("DEBUG: static test forcibly set after 500ms");
+                        setTimeout(() => {
+                            if (this.dom.morningRituals) {
+                                console.log("DEBUG: after 600ms, innerHTML is:", this.dom.morningRituals.innerHTML);
+                                console.log("DEBUG: is in DOM?", document.body.contains(this.dom.morningRituals));
+                            }
+                        }, 600);
+                    }
+                }, 500);
+            }
+        }, 100);
+
+        // Helper to render rituals in a container
+        function renderRitualList(rituals, container, iconMap) {
+            if (rituals.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500 italic px-3">Aucun rituel</p>';
+                return;
+            }
+            let html = '';
+            // Get completed rituals for today
+            const todayKey = RitualsApp.getDateKey ? RitualsApp.getDateKey() : (new Date()).toISOString().split('T')[0];
+            const completed = RitualsApp.history && RitualsApp.history[todayKey] && Array.isArray(RitualsApp.history[todayKey].completed)
+                ? RitualsApp.history[todayKey].completed
+                : [];
+            rituals.forEach(r => {
+                const isChecked = completed.includes(r.id) ? 'checked' : '';
+                html += `
+                    <label class="flex items-center p-2 bg-white rounded shadow-sm mb-2 cursor-pointer">
+                        <input type="checkbox" class="rituals-checkbox mr-2" data-ritual-id="${r.id}" ${isChecked} />
+                        <span class="mr-2 text-xl"><i class="${RitualsApp.iconMap[r.icon] || 'fas fa-check-circle'}"></i></span>
+                        <span>${r.name}</span>
+                    </label>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        renderRitualList(categories.morning, this.dom.morningRituals, this.iconMap);
+        renderRitualList(categories.afternoon, this.dom.afternoonRituals, this.iconMap);
+        renderRitualList(categories.evening, this.dom.eveningRituals, this.iconMap);
+    },
     createRitualHTML: function(ritual, isCompleted) { /* ... (Identique à la version précédente) ... */ },
     renderHistoryView: function() { /* ... (Identique à la version précédente) ... */ },
     renderStatsView: function() { /* ... (Identique à la version précédente) ... */ },
-    renderSettingsView: function() { /* ... (Identique à la version précédente) ... */ },
+    renderSettingsView: function() {
+        if (!this.dom.availableRituals) return;
+        // Group rituals by category
+        const categories = {
+            morning: [],
+            afternoon: [],
+            evening: []
+        };
+        this.rituals.forEach(r => {
+            if (categories[r.category]) categories[r.category].push(r);
+        });
+
+        let html = '';
+        const categoryLabels = {
+            morning: 'Matin',
+            afternoon: 'Après-midi',
+            evening: 'Soir'
+        };
+        for (const cat of ['morning', 'afternoon', 'evening']) {
+            html += `<div class="mb-4"><h4 class="font-semibold text-indigo-700 mb-2">${categoryLabels[cat]}</h4>`;
+            if (categories[cat].length === 0) {
+                html += `<p class="text-gray-400 text-sm">Aucun rituel</p>`;
+            } else {
+                html += '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">';
+                categories[cat].forEach(r => {
+                    html += `
+                        <div class="flex items-center p-2 bg-gray-50 rounded shadow-sm">
+                            <span class="mr-2 text-xl"><i class="${this.iconMap[r.icon] || 'fas fa-check-circle'}"></i></span>
+                            <span>${r.name}</span>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+        this.dom.availableRituals.innerHTML = html;
+    },
 
     // --- Actions ---
     toggleRitualCompletion: function(ritualId, completed) { /* ... (Identique à la version précédente) ... */ },
     saveReflection: function() { /* ... (Identique à la version précédente) ... */ },
-    addNewRitual: function() { /* ... (Identique à la version précédente) ... */ },
+    addNewRitual: function() {
+        // Get values from modal form
+        const name = this.dom.ritualNameInput?.value.trim();
+        const category = this.dom.ritualCategorySelect?.value;
+        const icon = this.dom.ritualIconSelect?.value;
+
+        if (!name) {
+            alert("Veuillez entrer un nom pour le rituel");
+            return;
+        }
+        // Generate a unique id
+        const newId = this.rituals.length > 0
+            ? Math.max(...this.rituals.map(r => {
+                if (typeof r.id === "number") return r.id;
+                if (typeof r.id === "string" && /^\d+$/.test(r.id)) return parseInt(r.id, 10);
+                return 0;
+            })) + 1
+            : 1;
+
+        // Add new ritual
+        this.rituals.push({
+            id: newId,
+            name: name,
+            category: category,
+            icon: icon,
+            active: true
+        });
+
+        this.saveData();
+        if (this.dom.addRitualModal) this.dom.addRitualModal.classList.remove('visible');
+        if (typeof this.renderSettingsView === 'function') this.renderSettingsView();
+        if (typeof this.renderTodayView === 'function') this.renderTodayView();
+
+        // Reset form
+        if (this.dom.ritualNameInput) this.dom.ritualNameInput.value = '';
+        if (this.dom.ritualCategorySelect) this.dom.ritualCategorySelect.value = 'morning';
+        if (this.dom.ritualIconSelect) this.dom.ritualIconSelect.value = 'sun';
+    },
     toggleRitualActive: function(ritualId, isActive) { /* ... (Identique à la version précédente) ... */ },
     confirmDeleteRitual: function(ritualId) { /* ... (Identique à la version précédente) ... */ },
     deleteRitual: function(ritualId) { /* ... (Identique à la version précédente) ... */ },
@@ -621,7 +889,11 @@ const RitualsApp = {
     resetData: function() { /* ... (Identique à la version précédente) ... */ },
 
     // --- Stats Calculation ---
-    calculateStats: function() { /* ... (Identique à la version précédente) ... */ },
+    calculateStats: function() {
+        // Minimal implementation to prevent crash
+        // You can expand this to compute real stats if needed
+        return { streak: 0, successRate: 0, favorite: null };
+    },
     getWeeklyCompletionData: function() { /* ... (Identique à la version précédente) ... */ },
     getRitualDistributionData: function() { /* ... (Identique à la version précédente) ... */ },
 

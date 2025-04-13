@@ -209,12 +209,11 @@ const WheelApp = {
      */
     injectInitialHTML: function() {
         const container = document.getElementById('app-wheel');
-        if (!container || container.innerHTML.trim() !== '') {
-             // Avoid re-injecting if already present (e.g., on hot-reload)
-            // console.log("WheelApp HTML already present or container not found.");
+        if (!container) {
+            console.error("WheelApp: Container #app-wheel not found!");
             return;
         }
-
+        // Always inject the HTML, even if the container is not empty
         container.innerHTML = `
             <!-- Welcome View -->
             <div id="wheel-welcomeView" class="wheel-main-view" style="display: none;">
@@ -860,13 +859,50 @@ Object.assign(WheelApp, { // Merging methods into the existing WheelApp object
                 const displayGoal = (typeof subPillar.goal === 'number' && !isNaN(subPillar.goal)) ? subPillar.goal : 10;
                 const noteIconColorClass = subPillar.note ? 'wheel-note-active' : ''; // Add class if note exists?
 
+                // Ajout du bouton "Créer un objectif" si score faible
+                let createGoalBtn = '';
+                if (displayScore <= 5) {
+                    createGoalBtn = `<button class="wheel-create-goal-btn" data-pillar-id="${pillar.id}" data-subpillar-id="${subPillar.id}" data-subpillar-name="${subPillar.name}" style="margin-left:10px; color:#fff; background:#6366f1; border:none; border-radius:4px; padding:2px 8px; font-size:0.85em; cursor:pointer;">Créer un objectif</button>`;
+                }
+                // Recherche des objectifs liés à ce sous-pilier
+                let linkedGoalsHTML = '';
+                if (typeof GoalsApp !== 'undefined' && GoalsApp.pillarsData) {
+                    const goals = [];
+                    GoalsApp.pillarsData.forEach(gPillar => {
+                        gPillar.subPillars.forEach(gSub => {
+                            if (
+                                (gSub.id === subPillar.id || gSub.name === subPillar.name) &&
+                                Array.isArray(gSub.goals)
+                            ) {
+                                gSub.goals.forEach(goalText => {
+                                    if (goalText && goalText.trim() !== '') {
+                                        goals.push(goalText);
+                                    }
+                                });
+                            }
+                        });
+                    });
+                    if (goals.length > 0) {
+                        linkedGoalsHTML = `<div class="mt-1 mb-2 text-xs text-purple-700">
+                            <i class="fas fa-bullseye mr-1"></i>
+                            Objectifs associés :
+                            <ul class="ml-4 list-disc">
+                                ${goals.map(g => `<li>${g}</li>`).join('')}
+                            </ul>
+                            <a href="#" class="underline text-indigo-600 hover:text-indigo-800" onclick="if(typeof MainApp!=='undefined'){MainApp.showMainApp();MainApp.showApp('goals');} return false;">Voir/modifier dans Objectifs</a>
+                        </div>`;
+                    }
+                }
+
                 pillarHTML += `
                     <div class="wheel-sub-pillar" id="wheel-subpillar-div-${subPillar.id}">
                         <div class="wheel-sub-pillar-header">
                             <label for="wheel-range-${subPillar.id}" id="wheel-label-${subPillar.id}">
                                 <span>${subPillar.name}</span>
                                 ${createTooltipHTML(subPillar.tooltip)}
+                                ${createGoalBtn}
                             </label>
+                            ${linkedGoalsHTML}
                             <div class="wheel-sub-pillar-controls">
                                 <input type="range" id="wheel-range-${subPillar.id}" min="1" max="10" value="${displayScore}"
                                        oninput="WheelApp.updateScore('${pillar.id}', '${subPillar.id}', this.value, true)"
@@ -2075,6 +2111,27 @@ Object.assign(WheelApp, { // Merging methods into the existing WheelApp object
     addEventListeners: function() {
         // Welcome Screen Button
         this.dom.startEvaluationBtn?.addEventListener('click', () => this.startEvaluation());
+
+        // Lien Roue → Objectifs : bouton "Créer un objectif"
+        if (this.dom.pillarDisplay) {
+            this.dom.pillarDisplay.addEventListener('click', (e) => {
+                const btn = e.target.closest('.wheel-create-goal-btn');
+                if (btn) {
+                    // Stocker l'info dans localStorage
+                    const pillarId = btn.getAttribute('data-pillar-id');
+                    const subPillarId = btn.getAttribute('data-subpillar-id');
+                    const subPillarName = btn.getAttribute('data-subpillar-name');
+                    localStorage.setItem('wheel_to_goal', JSON.stringify({
+                        pillarId, subPillarId, subPillarName
+                    }));
+                    // Basculer sur l'onglet Objectifs
+                    if (typeof MainApp !== 'undefined') {
+                        MainApp.showMainApp();
+                        MainApp.showApp('goals');
+                    }
+                }
+            });
+        }
 
         // Input View Buttons
         this.dom.prevBtn?.addEventListener('click', () => this.changePillar(-1));

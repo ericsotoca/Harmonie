@@ -71,10 +71,7 @@ const GoalsApp = {
             console.error("GoalsApp: Container #app-goals not found!");
             return;
         }
-        if (container.innerHTML.trim() !== '') {
-           // console.log("GoalsApp HTML already present.");
-            return;
-        }
+        // Always inject the HTML, even if the container is not empty
         container.innerHTML = `
             <div class="goals-container">
                 <!-- Écran d'accueil -->
@@ -140,6 +137,23 @@ const GoalsApp = {
         this.dom.pillarContent?.addEventListener('click', (e) => {
             if (e.target && e.target.matches('.goals-objectif input')) {
                 this.ouvrirPopup(e.target);
+            }
+        });
+        // Association Objectif ↔ Rituel : select
+        this.dom.pillarContent?.addEventListener('change', (e) => {
+            if (e.target && e.target.matches('.goals-ritual-link')) {
+                const pillarId = e.target.getAttribute('data-pillar-id');
+                const subPillarId = e.target.getAttribute('data-subpillar-id');
+                const goalIndex = parseInt(e.target.getAttribute('data-goal-index'), 10);
+                const ritualId = e.target.value;
+                const pillar = this.pillarsData.find(p => p.id === pillarId);
+                if (pillar) {
+                    const subPillar = pillar.subPillars.find(sp => sp.id === subPillarId);
+                    if (subPillar && Array.isArray(subPillar.linkedRituals)) {
+                        subPillar.linkedRituals[goalIndex] = ritualId || null;
+                        this.renderPillar();
+                    }
+                }
             }
         });
         this.dom.popupSaveBtn?.addEventListener('click', () => this.modifierObjectif());
@@ -280,26 +294,96 @@ const GoalsApp = {
 
         let contentHTML = '';
         if (Array.isArray(pillar.subPillars) && pillar.subPillars.length > 0) {
+            // Pré-remplissage depuis la Roue de la Vie
+            let wheelToGoal = null;
+            try {
+                wheelToGoal = JSON.parse(localStorage.getItem('wheel_to_goal') || 'null');
+            } catch (e) { wheelToGoal = null; }
             pillar.subPillars.forEach(subPillar => {
                  if (!subPillar || !subPillar.id || !subPillar.name) {
                       console.warn(`Skipping invalid subpillar in pillar ${pillar.name}:`, subPillar);
                       return;
                  }
-                 const goals = Array.isArray(subPillar.goals) && subPillar.goals.length === 3 ? subPillar.goals : ['', '', ''];
-                contentHTML += `
+                 let goals = Array.isArray(subPillar.goals) && subPillar.goals.length === 3 ? subPillar.goals : ['', '', ''];
+                 // Pré-remplir si demandé par la Roue
+                 if (
+                    wheelToGoal &&
+                    (subPillar.id === wheelToGoal.subPillarId || subPillar.name === wheelToGoal.subPillarName)
+                 ) {
+                    // Remplir le premier objectif vide
+                    for (let i = 0; i < goals.length; i++) {
+                        if (!goals[i] || goals[i].trim() === '') {
+                            goals[i] = `Nouvel objectif pour ${subPillar.name}`;
+                            // Nettoyer le flag pour éviter le pré-remplissage multiple
+                            localStorage.removeItem('wheel_to_goal');
+                            break;
+                        }
+                    }
+                 }
+
+                 // --- Association Objectif ↔ Rituel ---
+                 // Initialisation de la structure d'association si absente
+                 if (!subPillar.linkedRituals) subPillar.linkedRituals = [null, null, null];
+
+                 // Générer la liste des rituels actifs pour le sélecteur
+                 let ritualsOptions = '';
+                 if (typeof RitualsApp !== 'undefined' && Array.isArray(RitualsApp.rituals)) {
+                    RitualsApp.rituals.filter(r => r.active).forEach(r => {
+                        ritualsOptions += `<option value="${r.id}">${r.name} (${r.category})</option>`;
+                    });
+                 }
+
+                 // Générer l'affichage des rituels associés pour chaque objectif
+                 function renderLinkedRitual(ritualId) {
+                    if (!ritualId || !RitualsApp || !Array.isArray(RitualsApp.rituals)) return '';
+                    const r = RitualsApp.rituals.find(rr => rr.id == ritualId);
+                    if (!r) return '';
+                    return `<span class="inline-block bg-blue-100 text-blue-700 rounded px-2 py-1 text-xs mr-1 mb-1"><i class="fas fa-spa mr-1"></i>${r.name}</span>`;
+                 }
+
+                 // Helper: progression rituels pour un objectif
+                 function renderRitualProgress(linkedRituals) {
+                    if (!RitualsApp || !Array.isArray(RitualsApp.rituals) || !RitualsApp.history) return '';
+                    const todayKey = RitualsApp.getDateKey ? RitualsApp.getDateKey() : (new Date()).toISOString().split('T')[0];
+                    const completed = RitualsApp.history[todayKey]?.completed || [];
+                    const linked = linkedRituals.filter(rid => rid);
+                    if (linked.length === 0) return '';
+                    const done = linked.filter(rid => completed.includes(rid)).length;
+                    return `<div class="text-xs text-blue-700 mt-1 mb-1"><i class="fas fa-check-circle mr-1"></i>Progression rituels : ${done}/${linked.length} aujourd’hui</div>`;
+                 }
+
+                 contentHTML += `
                     <div class="goals-sous-pilier" data-subpillar-id="${subPillar.id}">
                         <h3>${subPillar.name}</h3>
                         <div class="goals-objectif">
                             <span class="goals-objectif-label">Objectif 1:</span>
                             <input type="text" value="${this.escapeHTML(goals[0])}" placeholder="Cliquez pour définir..." data-pillar-id="${pillar.id}" data-subpillar-id="${subPillar.id}" data-goal-index="0" readonly>
+                            <select class="goals-ritual-link" data-pillar-id="${pillar.id}" data-subpillar-id="${subPillar.id}" data-goal-index="0">
+                                <option value="">Associer un rituel...</option>
+                                ${ritualsOptions}
+                            </select>
+                            <div class="goals-linked-rituals">${renderLinkedRitual(subPillar.linkedRituals[0])}</div>
+                            ${renderRitualProgress([subPillar.linkedRituals[0]])}
                         </div>
                         <div class="goals-objectif">
                             <span class="goals-objectif-label">Objectif 2:</span>
                             <input type="text" value="${this.escapeHTML(goals[1])}" placeholder="Cliquez pour définir..." data-pillar-id="${pillar.id}" data-subpillar-id="${subPillar.id}" data-goal-index="1" readonly>
+                            <select class="goals-ritual-link" data-pillar-id="${pillar.id}" data-subpillar-id="${subPillar.id}" data-goal-index="1">
+                                <option value="">Associer un rituel...</option>
+                                ${ritualsOptions}
+                            </select>
+                            <div class="goals-linked-rituals">${renderLinkedRitual(subPillar.linkedRituals[1])}</div>
+                            ${renderRitualProgress([subPillar.linkedRituals[1]])}
                         </div>
                         <div class="goals-objectif">
                             <span class="goals-objectif-label">Objectif 3:</span>
                             <input type="text" value="${this.escapeHTML(goals[2])}" placeholder="Cliquez pour définir..." data-pillar-id="${pillar.id}" data-subpillar-id="${subPillar.id}" data-goal-index="2" readonly>
+                            <select class="goals-ritual-link" data-pillar-id="${pillar.id}" data-subpillar-id="${subPillar.id}" data-goal-index="2">
+                                <option value="">Associer un rituel...</option>
+                                ${ritualsOptions}
+                            </select>
+                            <div class="goals-linked-rituals">${renderLinkedRitual(subPillar.linkedRituals[2])}</div>
+                            ${renderRitualProgress([subPillar.linkedRituals[2]])}
                         </div>
                     </div>`;
             });
@@ -423,3 +507,6 @@ const GoalsApp = {
     }
 
 }; // Fin de l'objet GoalsApp
+
+// Initialisation de l'application GoalsApp
+GoalsApp.init();
