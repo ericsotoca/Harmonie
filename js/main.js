@@ -84,12 +84,14 @@ const MainApp = {
         }
 
         // Show the default or last viewed app
-        this.showApp(this.currentApp); // Show 'wheel' by default
+        // Ensure the first app ('wheel') is rendered *after* main content is visible
+        this.showApp(this.currentApp);
     },
 
     /**
      * Displays the specified application module and hides others.
      * Updates the active state of navigation buttons and app containers.
+     * Calls the appropriate rendering function for the activated app.
      * @param {string} appName - The name of the app to show ('wheel', 'goals', 'rituals').
      */
     showApp: function(appName) {
@@ -98,7 +100,12 @@ const MainApp = {
             console.error(`App container not found for: ${appName}`);
             return;
         }
+
+        // Check if already switching to the current app (avoid redundant work)
+        // Allow re-rendering if needed, but maybe not full state change
+        const switchingToCurrent = this.currentApp === appName;
         this.currentApp = appName;
+
 
         // Update Navigation Buttons state
         this.dom.navButtons.forEach(button => {
@@ -114,49 +121,86 @@ const MainApp = {
             const container = this.dom.appContainers[key];
             if (container) {
                 if (key === appName) {
-                    container.classList.add('active');
-                    // container.style.display = 'block'; // La classe .active gère ça via CSS
+                    if (!container.classList.contains('active')) {
+                        container.classList.add('active');
+                        console.log(`Container ${key} activated.`);
+                    }
+                    // Ensure display is correct (CSS should handle via .active, but double-check)
+                    // container.style.display = ''; // Let CSS handle it via .active class rule
                 } else {
-                    container.classList.remove('active');
-                    // container.style.display = 'none';
+                    if (container.classList.contains('active')) {
+                        container.classList.remove('active');
+                        console.log(`Container ${key} deactivated.`);
+                    }
+                    // container.style.display = 'none'; // Let CSS handle it
                 }
             }
         }
 
-        // Optional: Call a 'refresh' or 'render' function for the specific app
-        // This is useful if the app needs to redraw charts or update UI after being hidden.
-        switch(appName) {
-            case 'wheel':
-                // WheelApp might need to re-render chart if dimensions changed while hidden
-                 if (typeof WheelApp !== 'undefined' && WheelApp.chartInstance) {
-                     // Use a small timeout to ensure the container is fully visible before rendering
-                     setTimeout(() => {
-                        if (this.currentApp === 'wheel' && WheelApp.chartInstance) { // Double check we are still on wheel
-                             WheelApp.renderChart(); // Re-render current chart (could be comparison)
-                             console.log("WheelApp chart re-rendered on activation.");
+        // --- Call specific rendering/refresh function for the activated app ---
+        // Use setTimeout to ensure the DOM has updated (container is visible) before rendering
+        setTimeout(() => {
+            // Double-check we are still supposed to be on this app after the timeout
+            if (this.currentApp !== appName) {
+                console.log(`Render call for ${appName} aborted, app changed before timeout.`);
+                return;
+            }
+
+            console.log(`Attempting to render content for ${appName}...`);
+            switch(appName) {
+                case 'wheel':
+                    if (typeof WheelApp !== 'undefined') {
+                        // WheelApp.renderPillar() renders the inputs, renderChart() the graph
+                        // Check if the input view should be visible
+                        if (WheelApp.dom.inputView && WheelApp.dom.inputView.style.display !== 'none') {
+                            WheelApp.renderPillar(); // Ensure pillar inputs are rendered/updated
+                            console.log("WheelApp pillar re-rendered on activation.");
+                        } else if (WheelApp.dom.chartView && WheelApp.dom.chartView.style.display !== 'none' && WheelApp.chartInstance) {
+                            WheelApp.renderChart(); // Re-render chart if chart view is active
+                            console.log("WheelApp chart re-rendered on activation.");
+                        } else {
+                            // Default action if neither view is explicitly visible? Render pillar?
+                            WheelApp.renderPillar();
+                             console.log("WheelApp pillar rendered as default on activation.");
+                        }
+                    } else {
+                         console.error("WheelApp not defined during render call.");
+                    }
+                    break;
+                case 'goals':
+                    if (typeof GoalsApp !== 'undefined') {
+                         // Check if the main app content area is visible before rendering
+                         if (GoalsApp.dom.appContent && GoalsApp.dom.appContent.style.display !== 'none') {
+                            GoalsApp.renderPillar(); // Render the current pillar's content
+                            console.log("GoalsApp pillar rendered on activation.");
+                         } else {
+                            // If welcome screen is still somehow visible, maybe show app content first?
+                            // This case shouldn't happen often if welcome dismissal is handled correctly.
+                            GoalsApp.showAppContent(); // This function includes renderPillar after a timeout
+                            console.log("GoalsApp forcing app content view on activation.");
                          }
-                     }, 50);
-                 }
-                break;
-            case 'goals':
-                // GoalsApp might need to re-render if data could change in background (unlikely here)
-                // if (typeof GoalsApp !== 'undefined') GoalsApp.renderPillar();
-                break;
-            case 'rituals':
-                // RitualsApp might need to re-render stats charts
-                 if (typeof RitualsApp !== 'undefined') {
-                    // Use a small timeout
-                    setTimeout(() => {
-                         if (this.currentApp === 'rituals') { // Double check
-                             RitualsApp.renderStatsView(); // Re-render stats including charts
-                             console.log("RitualsApp stats re-rendered on activation.");
-                         }
-                     }, 50);
-                 }
-                break;
-        }
-    }
-};
+                    } else {
+                         console.error("GoalsApp not defined during render call.");
+                    }
+                    break;
+                case 'rituals':
+                    if (typeof RitualsApp !== 'undefined') {
+                        // RitualsApp uses switchToView which handles rendering the correct content
+                        // Call it with the currently stored view for RitualsApp
+                        RitualsApp.switchToView(RitualsApp.currentView);
+                        console.log(`RitualsApp switched to view '${RitualsApp.currentView}' on activation.`);
+                    } else {
+                         console.error("RitualsApp not defined during render call.");
+                    }
+                    break;
+                default:
+                    console.warn(`No specific render action defined for app: ${appName}`);
+            }
+        }, 50); // 50ms delay - adjust if needed, 0 might even work sometimes
+
+    } // End of showApp function
+
+}; // End of MainApp object
 
 // Initialize the main application when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
