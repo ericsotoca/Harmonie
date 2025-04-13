@@ -29,7 +29,6 @@
 
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
-
     <!-- Page d'Accueil (Nouvelle) -->
     <div id="landing-page" class="flex-grow flex flex-col items-center justify-center text-center p-8 bg-gradient-to-br from-indigo-100 via-purple-50 to-blue-100">
         <div class="max-w-2xl">
@@ -42,9 +41,34 @@
             <button id="start-app-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full text-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
                 Commencer mon parcours <i class="fas fa-arrow-right ml-2"></i>
             </button>
-             <p class="text-sm text-gray-500 mt-10">
+            <p class="text-sm text-gray-500 mt-10">
                 Vos données sont stockées localement sur votre appareil et restent confidentielles.
             </p>
+        </div>
+    </div>
+
+    <!-- Tableau de bord synthétique -->
+    <div id="dashboard" class="hidden flex-col flex-grow p-6 bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50">
+        <h2 class="text-2xl font-bold text-indigo-700 mb-4">Tableau de bord</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow p-4 flex flex-col items-center">
+                <span class="text-lg font-semibold text-gray-600 mb-2">Score global (Roue de la Vie)</span>
+                <span id="dashboard-wheel-score" class="text-3xl font-bold text-indigo-600">-</span>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4 flex flex-col items-center">
+                <span class="text-lg font-semibold text-gray-600 mb-2">Objectifs actifs</span>
+                <span id="dashboard-goals-count" class="text-3xl font-bold text-purple-600">-</span>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4 flex flex-col items-center">
+                <span class="text-lg font-semibold text-gray-600 mb-2">Progression rituels du jour</span>
+                <span id="dashboard-rituals-progress" class="text-3xl font-bold text-blue-600">-</span>
+            </div>
+        </div>
+        <div id="dashboard-alerts" class="mt-4"></div>
+        <div class="flex flex-wrap gap-4 mt-8">
+            <button id="dashboard-to-wheel" class="bg-indigo-500 text-white px-4 py-2 rounded shadow hover:bg-indigo-700 transition"><i class="fas fa-chart-pie mr-2"></i>Roue de la Vie</button>
+            <button id="dashboard-to-goals" class="bg-purple-500 text-white px-4 py-2 rounded shadow hover:bg-purple-700 transition"><i class="fas fa-bullseye mr-2"></i>Objectifs</button>
+            <button id="dashboard-to-rituals" class="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition"><i class="fas fa-spa mr-2"></i>Rituels</button>
         </div>
     </div>
 
@@ -53,6 +77,7 @@
         <!-- Navigation Principale -->
         <nav class="main-nav shadow-md">
             <!-- Les boutons seront générés dynamiquement ou copiés plus tard si besoin -->
+            <button id="nav-dashboard" class="dashboard-nav-btn">Tableau de bord</button>
             <button id="nav-wheel" data-app="wheel" class="active">Roue de la Vie</button>
             <button id="nav-goals" data-app="goals">Objectifs</button>
             <button id="nav-rituals" data-app="rituals">Rituels</button>
