@@ -654,31 +654,12 @@ const RitualsApp = {
         this.dom.morningRituals.innerHTML = '';
         this.dom.afternoonRituals.innerHTML = '';
         this.dom.eveningRituals.innerHTML = '';
-        // Remove debug/test styles
+        // Nettoyage debug/test styles
         if (this.dom.morningRituals) {
             this.dom.morningRituals.style.display = '';
             this.dom.morningRituals.style.background = '';
             this.dom.morningRituals.style.border = '';
             this.dom.morningRituals.style.minHeight = '';
-            // Log computed style
-            const cs = window.getComputedStyle(this.dom.morningRituals);
-            console.log("DEBUG: morningRituals computed style", {
-                display: cs.display,
-                opacity: cs.opacity,
-                visibility: cs.visibility,
-                height: cs.height,
-                width: cs.width
-            });
-            if (this.dom.morningRituals.parentElement) {
-                const pcs = window.getComputedStyle(this.dom.morningRituals.parentElement);
-                console.log("DEBUG: parent computed style", {
-                    display: pcs.display,
-                    opacity: pcs.opacity,
-                    visibility: pcs.visibility,
-                    height: pcs.height,
-                    width: pcs.width
-                });
-            }
         }
         if (this.dom.todayContent) {
             this.dom.todayContent.style.display = '';
@@ -688,54 +669,14 @@ const RitualsApp = {
             this.dom.todayContent.style.overflow = 'visible';
             this.dom.todayContent.style.position = 'relative';
             this.dom.todayContent.style.zIndex = '1000';
-            // Ajout d'un bouton de debug pour forcer le rendu
-            if (!document.getElementById('force-render-btn')) {
-                const btn = document.createElement('button');
-                btn.id = 'force-render-btn';
-                btn.textContent = 'Forcer le rendu';
-                btn.style.position = 'fixed';
-                btn.style.top = '10px';
-                btn.style.right = '10px';
-                btn.style.zIndex = '999999';
-                btn.style.background = 'red';
-                btn.style.color = 'white';
-                btn.onclick = () => {
-                    console.log("DEBUG: Forçage manuel du rendu via bouton");
-                    this.renderTodayView();
-                    // Test ultime : injecter un contenu statique dans le body
-                    if (!document.getElementById('static-test-body')) {
-                        const div = document.createElement('div');
-                        div.id = 'static-test-body';
-                        div.textContent = 'STATIC TEST BODY';
-                        div.style.position = 'fixed';
-                        div.style.bottom = '10px';
-                        div.style.left = '10px';
-                        div.style.zIndex = '9999999';
-                        div.style.background = 'lime';
-                        div.style.color = 'black';
-                        div.style.fontWeight = 'bold';
-                        div.style.fontSize = '24px';
-                        document.body.appendChild(div);
-                    }
-                    // Test ultime : injecter un contenu statique dans le conteneur .container
-                    const container = document.querySelector('.container');
-                    if (container && !document.getElementById('static-test-container')) {
-                        const div2 = document.createElement('div');
-                        div2.id = 'static-test-container';
-                        div2.textContent = 'STATIC TEST CONTAINER';
-                        div2.style.background = 'orange';
-                        div2.style.color = 'black';
-                        div2.style.fontWeight = 'bold';
-                        div2.style.fontSize = '20px';
-                        div2.style.margin = '10px';
-                        container.insertBefore(div2, container.firstChild);
-                    }
-                };
-                document.body.appendChild(btn);
-            }
         }
-        // Remove static test list
-        // (No need to add anything here, just let the dynamic rendering work)
+        // Suppression des éléments de debug
+        const btn = document.getElementById('force-render-btn');
+        if (btn) btn.remove();
+        const staticBody = document.getElementById('static-test-body');
+        if (staticBody) staticBody.remove();
+        const staticContainer = document.getElementById('static-test-container');
+        if (staticContainer) staticContainer.remove();
         // Group active rituals by category
         const categories = {
             morning: [],
@@ -750,25 +691,6 @@ const RitualsApp = {
         renderRitualList(categories.afternoon, this.dom.afternoonRituals, this.iconMap);
         renderRitualList(categories.evening, this.dom.eveningRituals, this.iconMap);
         console.log("DEBUG: rendered", categories.morning.length, "morning rituals");
-        // FINAL TEST: forcibly set static content after all rendering
-        setTimeout(() => {
-            if (this.dom.morningRituals) {
-                this.dom.morningRituals.innerHTML = '<div style="color:orange;font-weight:bold;">FINAL STATIC TEST</div>';
-                setTimeout(() => {
-                    if (this.dom.morningRituals) {
-                        this.dom.morningRituals.innerHTML = '<div style="color:blue;font-weight:bold;position:fixed;top:10px;left:10px;z-index:99999;background:yellow;">STATIC TEST 500ms FIXED</div>';
-                        console.log("DEBUG: static test forcibly set after 500ms");
-                        setTimeout(() => {
-                            if (this.dom.morningRituals) {
-                                console.log("DEBUG: after 600ms, innerHTML is:", this.dom.morningRituals.innerHTML);
-                                console.log("DEBUG: is in DOM?", document.body.contains(this.dom.morningRituals));
-                            }
-                        }, 600);
-                    }
-                }, 500);
-            }
-        }, 100);
-
         // Helper to render rituals in a container
         function renderRitualList(rituals, container, iconMap) {
             if (rituals.length === 0) {
