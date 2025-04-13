@@ -3,14 +3,13 @@
 /* ========================================= */
 
 #app-rituals {
-    /* Variables CSS spécifiques aux Rituels (peuvent être utilisées ou servir de référence) */
-    --rituals-primary: #6366f1;    /* indigo-500 */
-    --rituals-primary-dark: #4f46e5; /* indigo-600 */
-    --rituals-secondary: #f59e0b; /* amber-500 */
-    --rituals-success: #10b981;   /* emerald-500 */
-    --rituals-danger: #ef4444;   /* red-500 */
-    --rituals-light: #f8fafc;    /* slate-50 */
-    --rituals-dark: #1e293b;     /* slate-800 */
+    --rituals-primary: #6366f1;
+    --rituals-primary-dark: #4f46e5;
+    --rituals-secondary: #f59e0b;
+    --rituals-success: #10b981;
+    --rituals-danger: #ef4444;
+    --rituals-light: #f8fafc;
+    --rituals-dark: #1e293b;
     --rituals-gray-100: #f3f4f6;
     --rituals-gray-200: #e5e7eb;
     --rituals-gray-500: #6b7280;
@@ -18,87 +17,75 @@
     --rituals-gray-700: #374151;
     --rituals-gray-800: #1f2937;
 
-    /* Appliquer un fond par défaut si nécessaire, mais Tailwind le gère sur body */
-    /* background-color: var(--rituals-light); */
-    font-family: inherit; /* Hérite de body */
-    padding: 1rem; /* Padding global pour l'app */
+    font-family: inherit;
+    padding: 1rem;
 }
 
-/* Styles spécifiques non couverts par Tailwind ou nécessitant surcharge */
-
 /* --- Dégradés de fond pour les sections temporelles --- */
-/* Note: Ces classes sont appliquées via JS ou directement dans le HTML (si on le colle) */
 #app-rituals .rituals-morning-bg {
-    /* Jaune/Orange */
-    background: linear-gradient(135deg, #fde68a 0%, #fca5a5 100%); /* yellow-200 to red-300 */
-    color: #92400e; /* amber-800 (pour contraster avec le fond clair) */
+    background: linear-gradient(135deg, #fde68a 0%, #fca5a5 100%);
+    color: #92400e;
 }
 
 #app-rituals .rituals-afternoon-bg {
-    /* Bleu clair */
-    background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%); /* blue-300 to blue-400 */
-    color: #1e40af; /* blue-800 */
+    background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);
+    color: #1e40af;
 }
 
 #app-rituals .rituals-evening-bg {
-    /* Violet/Rose */
-    background: linear-gradient(135deg, #c4b5fd 0%, #f9a8d4 100%); /* violet-300 to pink-300 */
-    color: #5b21b6; /* violet-800 */
+    background: linear-gradient(135deg, #c4b5fd 0%, #f9a8d4 100%);
+    color: #5b21b6;
 }
 
 #app-rituals .rituals-night-bg {
-    /* Bleu nuit/Gris (si on avait une section Nuit) */
-    background: linear-gradient(135deg, #374151 0%, #1f2937 100%); /* gray-700 to gray-800 */
-    color: #e5e7eb; /* gray-200 */
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    color: #e5e7eb;
 }
 
-/* --- Styles des cartes de rituels --- */
+/* --- Cartes de rituels --- */
 #app-rituals .rituals-ritual-card {
-    /* Les classes Tailwind gèrent le fond, ombre, padding etc. */
     transition: all 0.3s ease;
 }
 
 #app-rituals .rituals-ritual-card:hover {
     transform: translateY(-2px);
-    /* box-shadow géré par Tailwind : hover:shadow-md ou hover:shadow-lg */
 }
 
 /* --- Barre de progression --- */
 #app-rituals .rituals-progress-bar {
     height: 8px;
-    border-radius: 9999px; /* rounded-full */
-    background-color: var(--rituals-gray-200); /* gray-200 */
-    overflow: hidden; /* Cache le contenu qui dépasse */
+    border-radius: 9999px;
+    background-color: var(--rituals-gray-200);
+    overflow: hidden;
 }
 
 #app-rituals .rituals-progress-fill {
     height: 100%;
-    border-radius: 9999px; /* rounded-full */
-    background-color: var(--rituals-primary); /* indigo-500 */
-    transition: width 0.5s ease; /* Animation douce */
+    border-radius: 9999px;
+    background-color: var(--rituals-primary);
+    transition: width 0.5s ease;
 }
 
 /* --- Conteneur de Graphiques --- */
 #app-rituals .rituals-chart-container {
-    position: relative; /* Nécessaire pour Chart.js responsive */
+    position: relative;
     height: 300px;
-    width: 100%; /* Prend toute la largeur disponible */
+    width: 100%;
 }
 
-/* --- Modals --- */
-/* Assure que les modales sont bien au-dessus et centrées */
+/* --- Modales --- */
 #app-rituals .rituals-modal {
     position: fixed;
-    inset: 0; /* Équivalent à top/left/right/bottom: 0 */
-    background-color: rgba(0, 0, 0, 0.6); /* Fond semi-transparent */
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1050; /* Au-dessus de l'overlay de la roue */
-    padding: 1rem; /* Espace autour du contenu modal */
-    backdrop-filter: blur(3px); /* Effet flou (optionnel) */
-    opacity: 0; /* Pour animation */
-    visibility: hidden; /* Pour animation */
+    z-index: 1000;
+    padding: 1rem;
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 #app-rituals .rituals-modal.visible {
@@ -108,32 +95,33 @@
 
 #app-rituals .rituals-modal-content {
     background-color: white;
-    border-radius: 0.5rem; /* rounded-lg */
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
-    width: 100%; /* Prend la largeur dispo (limité par max-w) */
-    max-width: 500px; /* Limite la largeur max (ajuster si besoin) */
-    max-height: 90vh; /* Limite la hauteur max */
-    overflow-y: auto; /* Scroll si dépasse */
-    animation: popupFadeIn 0.3s ease-out forwards; /* Réutilise l'animation de wheel.css */
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: popupFadeIn 0.3s ease-out forwards;
 }
 
-/* Style pour les switchs (si pas géré entièrement par Tailwind ou pour cohérence) */
+/* Animation pour les modales */
+@keyframes popupFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* --- Switchs --- */
 #app-rituals .rituals-toggle-switch input:focus-visible + div {
     outline: 2px solid var(--rituals-primary);
     outline-offset: 2px;
 }
 
-
-/* --- Ajustements Responsive --- */
+/* --- Responsive --- */
 @media (max-width: 640px) {
     #app-rituals .rituals-chart-container {
-        height: 250px; /* Hauteur réduite sur mobile */
+        height: 250px;
     }
-
-    /* Faire en sorte que les modales prennent plus de largeur sur petit écran */
     #app-rituals .rituals-modal-content {
         max-width: 95%;
     }
 }
-
-/* Fin des styles pour RitualsApp */
