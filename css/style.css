@@ -1,0 +1,143 @@
+/* ========================================= */
+/* == Global Styles & Body ================ */
+/* ========================================= */
+
+body {
+    /* Tailwind gère la plupart des styles de base */
+    transition: background-color 0.3s, color 0.3s;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; /* Fallback font stack */
+}
+
+/* Pour assurer que les conteneurs d'apps prennent la hauteur restante */
+.flex-grow {
+    flex-grow: 1;
+}
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Styles pour cacher/afficher des éléments */
+.hidden {
+    display: none;
+}
+
+/* ========================================= */
+/* == Landing Page Styles ================== */
+/* ========================================= */
+
+#landing-page {
+    /* Styles de base gérés par Tailwind via les classes dans index.html */
+    /* Ajouts possibles si besoin de plus de personnalisation */
+}
+
+#landing-page h1 {
+    /* Styles de base gérés par Tailwind */
+    /* Exemple d'ajout : animation légère */
+    animation: fadeInDown 0.8s ease-out forwards;
+}
+
+#landing-page p {
+    /* Styles de base gérés par Tailwind */
+    animation: fadeInUp 0.8s 0.2s ease-out forwards;
+    opacity: 0; /* Start hidden for animation */
+}
+
+#start-app-btn {
+    /* Styles de base gérés par Tailwind */
+    animation: fadeInUp 0.8s 0.4s ease-out forwards;
+    opacity: 0; /* Start hidden for animation */
+}
+
+/* Animations simples (facultatif) */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ========================================= */
+/* == Main Navigation Styles ============== */
+/* ========================================= */
+
+.main-nav {
+    background-color: #f8fafc; /* gray-50 ou white */
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #e5e7eb; /* gray-200 */
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem; /* Espace entre les boutons */
+    flex-wrap: wrap; /* Retour à la ligne si manque de place */
+}
+
+.main-nav button {
+    padding: 0.6rem 1.2rem; /* Un peu plus de padding */
+    border: none;
+    background-color: transparent;
+    color: #4b5563; /* gray-600 */
+    font-weight: 500; /* medium */
+    font-size: 0.95rem;
+    border-radius: 0.375rem; /* rounded-md */
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border-bottom: 3px solid transparent; /* Indicateur inactif */
+}
+
+.main-nav button:hover {
+    background-color: #f3f4f6; /* gray-100 */
+    color: #1f2937; /* gray-800 */
+    border-bottom-color: #d1d5db; /* gray-300 */
+}
+
+.main-nav button.active {
+    color: #4f46e5; /* indigo-600 */
+    font-weight: 600; /* semibold */
+    border-bottom-color: #4f46e5; /* indigo-600 */
+    background-color: transparent; /* L'indicateur de bordure suffit */
+}
+
+/* Style focus pour l'accessibilité */
+.main-nav button:focus-visible {
+    outline: 2px solid #6366f1; /* indigo-500 */
+    outline-offset: 2px;
+}
+
+/* ========================================= */
+/* == App Container Styles ================ */
+/* ========================================= */
+
+.app-container {
+    display: none; /* Caché par défaut, sera affiché par JS */
+    padding: 1rem; /* Espace intérieur par défaut */
+    /* flex-grow: 1; */ /* Assure que le conteneur prend la hauteur dispo si body est flex */
+    /* background-color: #ffffff; */ /* Fond par défaut si nécessaire */
+    /* box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); */ /* Ombre intérieure subtile si désiré */
+}
+
+.app-container.active {
+    display: block; /* Affiché quand actif */
+}
+
+/* On s'assure que le conteneur actif prend bien la hauteur */
+#main-app-content.flex-col .app-container.active {
+    flex-grow: 1;
+    display: flex; /* Pour que le contenu interne puisse aussi utiliser flex-grow si besoin */
+    flex-direction: column;
+}

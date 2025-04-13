@@ -1,0 +1,958 @@
+/* ========================================= */
+/* == App 1: Roue de la Vie Styles ======== */
+/* ========================================= */
+
+#app-wheel {
+    /* Variables CSS spécifiques à la Roue */
+    --wheel-bg-color: #f4f4f4;
+    --wheel-container-bg: white;
+    --wheel-text-color: #2c3e50;
+    --wheel-secondary-text-color: #34495e;
+    --wheel-primary-color: #3498db;
+    --wheel-primary-hover-color: #2980b9;
+    --wheel-disabled-color: #bdc3c7;
+    --wheel-slider-track-color: #dfe6e9;
+    --wheel-slider-thumb-color: #3498db;
+    --wheel-chart-bg-color: rgba(52, 152, 219, 0.2);
+    --wheel-chart-border-color: #3498db;
+    --wheel-goal-bg-color: rgba(231, 76, 60, 0.1);
+    --wheel-goal-border-color: #e74c3c;
+    --wheel-danger-color: #e74c3c;
+    --wheel-danger-hover-color: #c0392b;
+    --wheel-shadow-color: rgba(0, 0, 0, 0.1);
+    --wheel-focus-ring-color: #74b9ff;
+    --wheel-grid-color: #dbe4e9;
+    --wheel-tooltip-bg: rgba(52, 73, 94, 0.95);
+    --wheel-tooltip-text-color: white;
+    --wheel-pillar-border-color: transparent; /* Couleur de bordure par défaut */
+    --wheel-pillar-border-width: 10px;
+    --wheel-help-icon-color: #7f8c8d;
+    --wheel-help-icon-hover-color: var(--wheel-primary-color);
+    --wheel-action-key-color: #f39c12;
+
+    /* Couleurs des piliers (Thème Clair) */
+    --wheel-pillar-color-0: #e74c3c;
+    --wheel-pillar-color-1: #e67e22;
+    --wheel-pillar-color-2: #f1c40f;
+    --wheel-pillar-color-3: #2ecc71;
+    --wheel-pillar-color-4: #3498db;
+    --wheel-pillar-color-5: #1abc9c;
+    --wheel-pillar-color-6: #9b59b6;
+    --wheel-pillar-color-7: #34495e;
+
+    /* Appliquer les couleurs de base */
+    background-color: var(--wheel-bg-color);
+    color: var(--wheel-text-color);
+    font-family: inherit; /* Hérite de body ou peut être défini spécifiquement */
+    touch-action: manipulation; /* Optimization for touch interactions */
+}
+
+/* --- Thème Sombre --- */
+#app-wheel.dark-theme {
+    --wheel-bg-color: #2c3e50;
+    --wheel-container-bg: #34495e;
+    --wheel-text-color: #ecf0f1;
+    --wheel-secondary-text-color: #bdc3c7;
+    /* --wheel-primary-color: #3498db; garde la même ? */
+    --wheel-primary-hover-color: #5dade2;
+    --wheel-disabled-color: #7f8c8d;
+    --wheel-slider-track-color: #7f8c8d;
+    /* --wheel-slider-thumb-color: #3498db; garde la même ? */
+    --wheel-chart-bg-color: rgba(52, 152, 219, 0.3);
+    --wheel-chart-border-color: #5dade2;
+    --wheel-goal-bg-color: rgba(241, 150, 138, 0.2);
+    --wheel-goal-border-color: #f1948a;
+    /* --wheel-danger-color: #e74c3c; */
+    --wheel-danger-hover-color: #f1948a;
+    --wheel-shadow-color: rgba(0, 0, 0, 0.3);
+    --wheel-focus-ring-color: #a9cce3;
+    --wheel-grid-color: #566573;
+    --wheel-tooltip-bg: rgba(236, 240, 241, 0.95);
+    --wheel-tooltip-text-color: #2c3e50;
+    --wheel-help-icon-color: #95a5a6;
+    /* --wheel-help-icon-hover-color: var(--wheel-primary-color); */
+    /* --wheel-action-key-color: #f1c40f; */
+
+    /* Couleurs des piliers (Thème Sombre) */
+    --wheel-pillar-color-0: #c0392b;
+    --wheel-pillar-color-1: #d35400;
+    --wheel-pillar-color-2: #f39c12;
+    --wheel-pillar-color-3: #27ae60;
+    --wheel-pillar-color-4: #2980b9;
+    --wheel-pillar-color-5: #16a085;
+    --wheel-pillar-color-6: #8e44ad;
+    --wheel-pillar-color-7: #7f8c8d;
+}
+
+/* Application des styles de base pour le thème sombre via la classe */
+#app-wheel.dark-theme {
+    background-color: var(--wheel-bg-color);
+    color: var(--wheel-text-color);
+}
+
+/* --- Layout & Containers --- */
+#app-wheel .wheel-main-view {
+    max-width: 700px;
+    margin: 20px auto;
+    background: var(--wheel-container-bg);
+    color: var(--wheel-text-color);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--wheel-shadow-color);
+    transition: background-color 0.3s, color 0.3s, border-left-color 0.3s;
+    width: 100%; /* Prend la largeur dispo dans le conteneur principal */
+    box-sizing: border-box;
+}
+
+#app-wheel #wheel-inputView {
+    border-left: var(--wheel-pillar-border-width) solid var(--wheel-pillar-border-color);
+    /* Ajustement du padding pour compenser la bordure */
+    padding-left: calc(30px - var(--wheel-pillar-border-width));
+    position: relative; /* Pour le positionnement du theme switch */
+}
+
+#app-wheel #wheel-chartView {
+    display: none; /* Géré par JS */
+    text-align: center;
+}
+
+#app-wheel #wheel-welcomeView {
+    display: none; /* Géré par JS */
+    text-align: left; /* Plus lisible pour le texte */
+}
+
+/* --- Typography & Headings --- */
+#app-wheel h1, #app-wheel h2, #app-wheel h3 {
+    text-align: center;
+    color: var(--wheel-text-color);
+}
+#app-wheel h1 { font-size: 2.2rem; font-weight: 700; margin: 20px 0; }
+#app-wheel h2 { font-size: 1.8rem; margin-bottom: 20px; }
+#app-wheel h3 { /* Titre de pilier */
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap; /* Pour le compteur sur petit écran */
+    border-bottom: 1px solid var(--wheel-slider-track-color);
+    padding-bottom: 10px;
+}
+#app-wheel h3 span:first-child { flex-grow: 1; text-align: center; } /* Pour centrer le nom */
+
+#app-wheel h4 { margin-top: 15px; margin-bottom: 5px; color: var(--wheel-secondary-text-color); font-size: 1.1rem; }
+#app-wheel h5 { margin-top: 10px; margin-bottom: 5px; color: var(--wheel-secondary-text-color); font-size: 1rem; }
+#app-wheel ul { list-style: disc; padding-left: 20px; margin-bottom: 15px; }
+#app-wheel li { margin-bottom: 8px; }
+
+/* --- Logo & Scores --- */
+#app-wheel .wheel-logo {
+    display: block;
+    margin: 0 auto 20px;
+    max-width: 200px; /* Légèrement réduit */
+    height: auto;
+    cursor: pointer;
+}
+#app-wheel #wheel-globalScore {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-align: center;
+}
+#app-wheel #wheel-pillarAverageScore {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+    text-align: center;
+    color: var(--wheel-secondary-text-color);
+}
+
+/* --- Pillar & Sub-Pillar Structure --- */
+#app-wheel .wheel-pillar-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px 0 20px;
+    flex-wrap: wrap;
+}
+#app-wheel .wheel-pillar-actions button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    background-color: var(--wheel-slider-track-color);
+    color: var(--wheel-secondary-text-color);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+#app-wheel .wheel-pillar-actions button:hover:not(:disabled) {
+    background-color: var(--wheel-primary-hover-color);
+    color: white;
+}
+
+#app-wheel .wheel-pillar { /* Conteneur ajouté dynamiquement par JS */
+    margin-bottom: 25px;
+}
+
+#app-wheel .wheel-sub-pillar {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid var(--wheel-slider-track-color);
+    border-radius: 8px;
+    background-color: var(--wheel-bg-color); /* Fond légèrement différent */
+    transition: background-color 0.3s;
+}
+#app-wheel .wheel-sub-pillar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 10px;
+    flex-wrap: wrap; /* Important pour le responsive */
+}
+#app-wheel .wheel-sub-pillar label {
+    flex-grow: 1; /* Prend l'espace dispo */
+    font-size: 1.1rem;
+    color: var(--wheel-secondary-text-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 150px; /* Empêche d'être trop écrasé */
+    cursor: pointer; /* Indique qu'on peut cliquer sur le label */
+}
+#app-wheel .wheel-sub-pillar-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    /* width: 60%; Remplacé par flex-grow */
+    flex-grow: 1.5; /* Donne un peu plus de place aux contrôles */
+    min-width: 250px; /* Largeur minimum avant de passer à la ligne */
+}
+
+/* --- Sliders & Inputs --- */
+#app-wheel input[type="range"] {
+    flex-grow: 1; /* Prend l'espace dans les controls */
+    margin-left: 10px; /* Espace par rapport au label si sur la même ligne */
+    -webkit-appearance: none;
+    appearance: none;
+    height: 10px;
+    background: var(--wheel-slider-track-color);
+    border-radius: 5px;
+    outline: none;
+    transition: background 0.3s;
+    cursor: pointer;
+    box-shadow: inset 0 1px 3px var(--wheel-shadow-color);
+}
+#app-wheel input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: var(--wheel-slider-thumb-color);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    box-shadow: 0 2px 4px var(--wheel-shadow-color);
+}
+#app-wheel input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: var(--wheel-slider-thumb-color);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    transition: background 0.3s, transform 0.2s;
+    box-shadow: 0 2px 4px var(--wheel-shadow-color);
+}
+#app-wheel input[type="range"]::-webkit-slider-thumb:hover,
+#app-wheel input[type="range"]::-moz-range-thumb:hover {
+    transform: scale(1.1);
+}
+#app-wheel input[type="range"]:focus {
+    /* Outline géré globalement ou via :focus-visible si supporté */
+}
+#app-wheel input[type="range"]:focus-visible {
+    outline: 2px solid var(--wheel-focus-ring-color);
+    outline-offset: 4px; /* Plus visible */
+}
+#app-wheel .wheel-slider-value {
+    font-size: 1.1rem;
+    font-weight: bold;
+    min-width: 25px; /* Assure l'espace pour 1 ou 2 chiffres */
+    text-align: right;
+    color: var(--wheel-text-color);
+}
+#app-wheel .wheel-sub-pillar-details {
+    margin-top: 10px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding-left: 5px; /* Petit décalage */
+}
+#app-wheel .wheel-detail-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+#app-wheel .wheel-detail-group label {
+    font-size: 0.9rem;
+    color: var(--wheel-secondary-text-color);
+    flex-grow: 0; /* Ne grandit pas */
+    cursor: default;
+}
+#app-wheel .wheel-detail-group input[type="number"] {
+    padding: 5px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--wheel-slider-track-color);
+    background-color: var(--wheel-container-bg);
+    color: var(--wheel-text-color);
+    font-size: 0.9rem;
+    width: 50px;
+    text-align: center;
+}
+/* Hide browser default arrows for number input */
+#app-wheel input[type=number]::-webkit-inner-spin-button,
+#app-wheel input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+#app-wheel input[type=number] {
+    -moz-appearance: textfield; /* Firefox */
+}
+
+#app-wheel .wheel-note-button {
+    background: none;
+    border: none;
+    padding: 3px;
+    margin-left: 5px;
+    cursor: pointer;
+    color: var(--wheel-secondary-text-color);
+    line-height: 0; /* Pour aligner l'icône */
+    transition: color 0.2s;
+}
+#app-wheel .wheel-note-button:hover {
+    color: var(--wheel-primary-color);
+}
+#app-wheel .wheel-note-button svg {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+}
+
+/* --- Buttons --- */
+#app-wheel .wheel-nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    gap: 15px;
+}
+#app-wheel button, #app-wheel .wheel-button-like {
+    background-color: var(--wheel-primary-color);
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    text-align: center;
+    transition: background-color 0.3s, transform 0.1s;
+    text-decoration: none; /* Pour les liens stylés comme des boutons */
+    display: inline-block; /* Pour les liens */
+}
+#app-wheel button:disabled {
+    background-color: var(--wheel-disabled-color);
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.7;
+}
+#app-wheel button:hover:not(:disabled), #app-wheel .wheel-button-like:hover {
+    background-color: var(--wheel-primary-hover-color);
+    transform: translateY(-2px);
+}
+#app-wheel button:active:not(:disabled), #app-wheel .wheel-button-like:active {
+    transform: translateY(0);
+}
+#app-wheel button:focus-visible, #app-wheel .wheel-button-like:focus-visible {
+    outline: 3px solid var(--wheel-focus-ring-color);
+    outline-offset: 2px;
+}
+#app-wheel .wheel-danger-button {
+    background-color: var(--wheel-danger-color);
+}
+#app-wheel .wheel-danger-button:hover:not(:disabled) {
+    background-color: var(--wheel-danger-hover-color);
+}
+#app-wheel .wheel-icon-button {
+    background: none;
+    border: none;
+    padding: 2px;
+    cursor: pointer;
+    color: var(--wheel-secondary-text-color);
+    line-height: 1;
+    transition: color 0.2s, background-color 0.2s;
+}
+#app-wheel .wheel-icon-button:hover {
+    color: var(--wheel-primary-color);
+}
+#app-wheel .wheel-icon-button svg {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
+#app-wheel .wheel-danger-button.wheel-icon-button:hover {
+    color: var(--wheel-danger-hover-color); /* Utilise la couleur hover danger */
+}
+
+
+/* --- Chart --- */
+#app-wheel #wheel-radarChart {
+    max-width: 100%;
+    height: auto; /* Laisse Chart.js gérer la hauteur */
+    margin-top: 10px;
+    background-color: var(--wheel-container-bg); /* Assure le fond correct */
+    border-radius: 8px;
+    display: block; /* Assure que c'est un block-level element */
+}
+
+/* --- Modals (Popups) --- */
+#app-wheel #wheel-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 999;
+    display: none; /* Changé de flex à none par défaut */
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    backdrop-filter: blur(3px); /* Effet de flou (optionnel) */
+}
+/* Style pour afficher l'overlay quand il est actif */
+#app-wheel #wheel-overlay.visible {
+    display: flex;
+}
+
+#app-wheel .wheel-popup {
+    position: relative;
+    background: var(--wheel-container-bg);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--wheel-shadow-color);
+    max-width: 90%;
+    max-height: 85vh; /* Limite la hauteur */
+    overflow-y: auto; /* Ajoute le scroll si nécessaire */
+    width: 600px; /* Largeur max par défaut */
+    z-index: 1000;
+    flex-shrink: 0; /* Empêche de rétrécir dans le flex container */
+    display: none; /* Caché par défaut */
+    animation: popupFadeIn 0.3s ease-out forwards;
+}
+/* Animation pour l'ouverture des popups */
+@keyframes popupFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+#app-wheel .wheel-popup h3, #app-wheel .wheel-popup h4 {
+    margin-top: 0;
+    text-align: center;
+    padding-right: 35px; /* Espace pour le bouton fermer */
+    min-height: 1.5em; /* Évite le saut de layout */
+    margin-right: 5px; /* Légère marge */
+}
+#app-wheel .wheel-popup-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end; /* Aligne à droite par défaut */
+    gap: 10px;
+    flex-wrap: wrap; /* Retour à la ligne si nécessaire */
+    padding-top: 15px; /* Espace au dessus */
+    border-top: 1px solid var(--wheel-slider-track-color); /* Séparateur */
+}
+#app-wheel .wheel-popup-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    line-height: 1;
+    padding: 0 5px;
+    color: var(--wheel-secondary-text-color);
+    cursor: pointer;
+    transition: color 0.2s;
+    z-index: 1001;
+}
+#app-wheel .wheel-popup-close-btn:hover {
+    color: var(--wheel-danger-color);
+}
+
+/* --- Note Popup Specific --- */
+#app-wheel #wheel-notePopup textarea {
+    width: 100%;
+    min-height: 150px;
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px solid var(--wheel-slider-track-color);
+    border-radius: 4px;
+    background-color: var(--wheel-bg-color);
+    color: var(--wheel-text-color);
+    font-size: 1rem;
+    resize: vertical;
+    box-sizing: border-box;
+}
+#app-wheel #wheel-notePopup #wheel-notePopupSubPillarName {
+    font-weight: bold;
+    color: var(--wheel-primary-color);
+}
+#app-wheel .wheel-action-key-checkbox {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+#app-wheel .wheel-action-key-checkbox label {
+    font-size: 0.9rem;
+    color: var(--wheel-secondary-text-color);
+    cursor: pointer;
+}
+#app-wheel .wheel-action-key-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--wheel-action-key-color);
+    cursor: pointer;
+}
+
+/* --- History & Action Key Popups --- */
+#app-wheel #wheel-historyContent, #app-wheel #wheel-actionKeysContent {
+    margin-top: 15px;
+    max-height: 45vh; /* Limite la hauteur pour laisser place aux boutons */
+    overflow-y: auto; /* Scroll si nécessaire */
+    padding-right: 10px; /* Espace pour la barre de scroll */
+}
+#app-wheel #wheel-historyContent ul, #app-wheel #wheel-actionKeysContent ul {
+    list-style: none;
+    padding: 0;
+}
+#app-wheel #wheel-historyContent li, #app-wheel #wheel-actionKeysContent li {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--wheel-slider-track-color);
+}
+#app-wheel #wheel-historyContent li:last-child, #app-wheel #wheel-actionKeysContent li:last-child {
+    border-bottom: none;
+}
+#app-wheel .wheel-history-entry strong, #app-wheel .wheel-action-key-entry strong {
+    font-size: 1.1em;
+    display: block; /* Met le titre sur sa propre ligne */
+    margin-bottom: 5px;
+}
+#app-wheel .wheel-history-scores, #app-wheel .wheel-action-key-note {
+    margin-top: 5px;
+    font-size: 0.9em;
+    color: var(--wheel-secondary-text-color);
+    line-height: 1.4;
+}
+#app-wheel .wheel-action-key-note {
+    white-space: pre-wrap; /* Preserve line breaks in notes */
+    background-color: var(--wheel-bg-color); /* Fond léger pour distinction */
+    padding: 8px;
+    border-radius: 4px;
+    margin-top: 8px;
+}
+#app-wheel .wheel-action-key-link {
+    font-size: 0.8em;
+    color: var(--wheel-primary-color);
+    text-decoration: none;
+}
+#app-wheel .wheel-action-key-link:hover {
+    text-decoration: underline;
+}
+#app-wheel .wheel-score-diff {
+    margin-left: 5px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+#app-wheel .wheel-score-diff.positive { color: #2ecc71; }
+#app-wheel .wheel-score-diff.negative { color: var(--wheel-danger-color); }
+
+#app-wheel .wheel-history-scroll-container {
+    margin-bottom: 10px;
+    text-align: center; /* Centre le bouton */
+}
+#app-wheel #wheel-historyScrollToBottomBtn svg {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+}
+#app-wheel #wheel-historyScrollToBottomBtn:hover {
+    color: var(--wheel-primary-hover-color);
+    background-color: var(--wheel-slider-track-color);
+    border-radius: 50%;
+    padding: 4px;
+}
+#app-wheel #wheel-historyPopup .wheel-popup-buttons {
+    justify-content: center; /* Centre les boutons dans l'historique */
+}
+#app-wheel #wheel-compareControls {
+    margin-top: 15px;
+    display: none; /* Géré par JS */
+    text-align: center; /* Centre le bouton comparer */
+    padding: 10px 0;
+    border-top: 1px dashed var(--wheel-slider-track-color);
+}
+#app-wheel #wheel-compareControls button {
+    /* Utilise les styles de bouton standard */
+}
+#app-wheel .wheel-history-entry div:first-child { /* Style pour la ligne avec checkbox + date */
+    display: flex;
+    align-items: baseline; /* Aligne sur la ligne de base */
+    gap: 10px;
+    margin-bottom: 5px;
+    flex-wrap: wrap; /* Pour mobile */
+}
+#app-wheel .wheel-history-entry input[type="checkbox"] {
+    margin-top: 2px; /* Petit ajustement vertical */
+    width: 16px;
+    height: 16px;
+    accent-color: var(--wheel-primary-color);
+}
+
+/* Mini Trend Graph */
+#app-wheel .wheel-mini-trend-graph {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid var(--wheel-slider-track-color);
+    border-radius: 8px;
+    background-color: var(--wheel-bg-color);
+}
+#app-wheel .wheel-mini-trend-graph h5 {
+    margin-top: 0;
+    text-align: center;
+    color: var(--wheel-secondary-text-color);
+}
+#app-wheel .wheel-trend-bars {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    height: 60px; /* Hauteur fixe pour le graphique */
+    padding: 0 10px;
+    margin-top: 10px; /* Espace après le titre */
+}
+#app-wheel .wheel-trend-bar-item {
+    display: flex;
+    flex-direction: column-reverse; /* Barre en bas, valeur en haut */
+    align-items: center;
+    flex-basis: 0;
+    flex-grow: 1;
+    max-width: 50px; /* Limite la largeur */
+    position: relative; /* Pour le positionnement du label date */
+}
+#app-wheel .wheel-trend-bar {
+    width: 70%;
+    background-color: var(--wheel-primary-color);
+    border-radius: 3px 3px 0 0;
+    transition: height 0.3s ease-out;
+}
+#app-wheel .wheel-trend-bar-item .wheel-trend-date-label { /* Remplacé span */
+    position: absolute;
+    bottom: -20px; /* Sous la barre */
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--wheel-secondary-text-color);
+    white-space: nowrap;
+}
+#app-wheel .wheel-trend-bar-item .wheel-bar-value {
+    font-size: 0.8rem;
+    margin-bottom: 3px; /* Espace au-dessus de la barre */
+    font-weight: bold;
+    color: var(--wheel-text-color);
+}
+
+/* --- Customization Popup --- */
+#app-wheel .wheel-customization-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed var(--wheel-slider-track-color);
+}
+#app-wheel .wheel-customization-section:last-of-type {
+    border-bottom: none;
+}
+#app-wheel .wheel-customization-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+#app-wheel .wheel-customization-item input[type="text"] {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid var(--wheel-slider-track-color);
+    border-radius: 4px;
+    background-color: var(--wheel-bg-color);
+    color: var(--wheel-text-color);
+    min-width: 150px;
+}
+#app-wheel .wheel-customization-item button { /* Style pour futur bouton supprimer */
+    /* Utilise .wheel-icon-button .wheel-danger-button */
+    padding: 5px; /* Ajustement */
+}
+
+/* --- Pillar Navigation --- */
+#app-wheel .wheel-pillar-nav {
+    display: flex;
+    justify-content: center;
+    gap: 5px; /* Espace réduit */
+    flex-wrap: wrap;
+    margin: 15px 0;
+    padding-bottom: 15px; /* Espace avant le score global */
+}
+#app-wheel .wheel-pillar-nav-button {
+    background-color: var(--wheel-slider-track-color);
+    color: var(--wheel-secondary-text-color); /* Moins contrasté si inactif */
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    font-size: 0.85rem; /* Légèrement plus petit */
+    border: none;
+}
+#app-wheel .wheel-pillar-nav-button.active {
+    background-color: var(--wheel-primary-color);
+    color: white;
+    font-weight: bold;
+}
+#app-wheel .wheel-pillar-nav-button:hover:not(.active) {
+    background-color: var(--wheel-primary-hover-color);
+    color: white;
+}
+
+/* --- Theme Switch --- */
+#app-wheel .wheel-theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 5; /* Au-dessus du contenu mais sous les popups */
+}
+#app-wheel .wheel-theme-switch {
+    display: inline-block;
+    height: 24px;
+    position: relative;
+    width: 50px;
+}
+#app-wheel .wheel-theme-switch input { display:none; } /* Cache la checkbox réelle */
+
+#app-wheel .wheel-slider { /* Le fond du switch */
+    background-color: #ccc;
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: .4s;
+    border-radius: 34px; /* Pour le rendre rond */
+}
+#app-wheel .wheel-slider:before { /* Le cercle mobile */
+    background-color: #fff;
+    bottom: 4px;
+    content: "";
+    height: 16px;
+    left: 4px;
+    position: absolute;
+    transition: .4s;
+    width: 16px;
+    border-radius: 50%;
+}
+#app-wheel input:checked + .wheel-slider {
+    background-color: var(--wheel-primary-color); /* Couleur quand activé */
+}
+#app-wheel input:checked + .wheel-slider:before {
+    transform: translateX(26px); /* Déplace le cercle */
+}
+/* Style focus pour le switch */
+#app-wheel input:focus-visible + .wheel-slider {
+     box-shadow: 0 0 1px var(--wheel-primary-color);
+     outline: 2px solid var(--wheel-focus-ring-color);
+     outline-offset: 1px;
+}
+
+/* --- Help Popup --- */
+#app-wheel #wheel-helpPopup ul {
+    margin-top: 15px;
+    padding-left: 20px;
+}
+#app-wheel #wheel-helpPopup li {
+    margin-bottom: 8px;
+}
+
+/* --- Tooltips & Help Icons --- */
+#app-wheel .wheel-help-icon {
+    display: inline-block;
+    margin-left: 5px;
+    color: var(--wheel-help-icon-color);
+    cursor: help;
+    position: relative; /* Nécessaire pour positionner le tooltip */
+    font-weight: bold;
+    font-size: 0.9em;
+    border: 1px solid var(--wheel-help-icon-color);
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    line-height: 14px; /* Ajusté pour centrer le '?' */
+    text-align: center;
+    transition: color 0.2s, border-color 0.2s;
+    user-select: none; /* Empêche la sélection du '?' */
+    vertical-align: middle; /* Meilleur alignement avec le texte */
+}
+#app-wheel .wheel-help-icon:hover,
+#app-wheel .wheel-help-icon:focus {
+    color: var(--wheel-help-icon-hover-color);
+    border-color: var(--wheel-help-icon-hover-color);
+    outline: none;
+}
+#app-wheel .wheel-tooltiptext {
+    visibility: hidden;
+    width: 220px;
+    background-color: var(--wheel-tooltip-bg);
+    color: var(--wheel-tooltip-text-color);
+    text-align: left;
+    font-size: 0.85rem;
+    font-weight: normal;
+    border-radius: 6px;
+    padding: 8px 10px;
+    position: absolute;
+    z-index: 10; /* Au dessus des autres éléments */
+    bottom: 135%; /* Positionne au-dessus de l'icône */
+    left: 50%;
+    margin-left: -110px; /* Centre le tooltip (moitié de sa largeur) */
+    opacity: 0;
+    transition: opacity 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    pointer-events: none; /* N'interfère pas avec la souris */
+}
+/* La flèche du tooltip */
+#app-wheel .wheel-tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%; /* En bas du tooltip */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--wheel-tooltip-bg) transparent transparent transparent;
+}
+#app-wheel .wheel-help-icon:hover .wheel-tooltiptext,
+#app-wheel .wheel-help-icon:focus .wheel-tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* --- Utility Classes (Wheel specific if needed) --- */
+#app-wheel .wheel-hidden { display: none; }
+#app-wheel .wheel-text-center { text-align: center; }
+#app-wheel .wheel-mt-1 { margin-top: 10px; }
+#app-wheel .wheel-mt-2 { margin-top: 20px; }
+#app-wheel .wheel-mb-2 { margin-bottom: 20px; }
+#app-wheel .wheel-w-100 { width: 100%; }
+
+/* --- Loading & Notifications --- */
+#app-wheel .wheel-loading-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--wheel-container-bg);
+    color: var(--wheel-text-color); /* Assure la bonne couleur de texte */
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--wheel-shadow-color);
+    z-index: 1050; /* Au dessus de l'overlay */
+    display: none; /* Géré par JS */
+    font-weight: 500;
+}
+#app-wheel .wheel-notification {
+    position: fixed;
+    bottom: 20px; /* En bas */
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--wheel-primary-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    z-index: 1050; /* Au dessus de l'overlay */
+    display: none; /* Géré par JS */
+    box-shadow: 0 2px 8px var(--wheel-shadow-color);
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+/* Style pour afficher la notification */
+#app-wheel .wheel-notification.visible {
+    display: block;
+    opacity: 1;
+}
+
+
+/* --- Media Queries (Wheel specific) --- */
+@media (max-width: 768px) {
+    #app-wheel .wheel-main-view { padding: 20px; }
+    #app-wheel #wheel-inputView { padding-left: calc(20px - var(--wheel-pillar-border-width)); }
+    #app-wheel h1 { font-size: 1.8rem; }
+    #app-wheel .wheel-sub-pillar-header { flex-direction: column; align-items: stretch; gap: 8px; }
+    #app-wheel .wheel-sub-pillar-controls { width: 100%; margin-top: 5px; flex-grow: 1; /* Prend toute la largeur */ }
+    #app-wheel input[type="range"] { margin-left: 0; width: 100%; }
+    #app-wheel .wheel-sub-pillar label { font-size: 1rem; }
+    #app-wheel .wheel-popup-buttons { flex-direction: column; gap: 10px; align-items: stretch; /* Boutons pleine largeur */ border-top: none; padding-top: 0;}
+    #app-wheel .wheel-popup-buttons button,
+    #app-wheel .wheel-popup-buttons .wheel-button-like { width: 100%; }
+
+    /* Spécifique pour boutons historique pour qu'ils restent en ligne */
+    #app-wheel #wheel-historyPopup .wheel-popup-buttons {
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px; /* Espace ajusté */
+        border-top: 1px solid var(--wheel-slider-track-color); /* Rétablir la bordure */
+        padding-top: 15px; /* Rétablir le padding */
+    }
+     #app-wheel #wheel-historyPopup .wheel-popup-buttons button,
+     #app-wheel #wheel-historyPopup .wheel-popup-buttons .wheel-button-like { width: auto; flex-grow: 0; flex-shrink: 0; margin-bottom: 5px; }
+
+    #app-wheel .wheel-popup { width: 95%; padding: 20px; max-height: 90vh; }
+    #app-wheel .wheel-theme-switch-wrapper { position: static; justify-content: center; margin: 15px 0 5px; order: -1; /* Le met en haut dans le flex container */ }
+    #app-wheel .wheel-detail-group { flex-basis: calc(50% - 8px); /* Deux colonnes */ }
+    #app-wheel .wheel-detail-group:has(.wheel-note-button) { flex-basis: auto; } /* Le groupe note prend sa place */
+    #app-wheel h3 { font-size: 1.3rem; }
+    #app-wheel #wheel-notePopup textarea { min-height: 100px; }
+    #app-wheel .wheel-popup-close-btn { font-size: 1.6rem; top: 8px; right: 10px; }
+    #app-wheel .wheel-popup h3, #app-wheel .wheel-popup h4 { padding-right: 30px; }
+    #app-wheel .wheel-pillar-nav { gap: 5px; }
+    #app-wheel .wheel-pillar-nav-button { padding: 4px 8px; font-size: 0.8rem; }
+    #app-wheel .wheel-pillar-actions { margin-bottom: 15px; }
+    #app-wheel .wheel-tooltiptext { width: 180px; margin-left: -90px; bottom: 140%; }
+}
+
+@media (max-width: 480px) {
+    #app-wheel .wheel-detail-group { flex-basis: 100%; /* Une colonne */ }
+    #app-wheel h1 { font-size: 1.6rem; }
+    #app-wheel h3 { flex-direction: column; gap: 5px; } /* Titre de pilier en colonne */
+    #app-wheel .wheel-pillar-nav-button { flex-basis: calc(33.333% - 4px); text-align: center; } /* 3 boutons par ligne */
+    #app-wheel .wheel-pillar-actions button { font-size: 0.85rem; padding: 5px 10px; }
+    #app-wheel .wheel-trend-bar-item .wheel-trend-date-label { font-size: 0.7rem; }
+    #app-wheel #wheel-globalScore { font-size: 1.4rem; }
+    #app-wheel .wheel-nav-buttons { flex-direction: column; align-items: stretch; } /* Boutons pleine largeur */
+    #app-wheel .wheel-nav-buttons button { width: 100%; }
+}
+
+/* Fin des styles pour WheelApp */
