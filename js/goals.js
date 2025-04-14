@@ -292,13 +292,24 @@ const GoalsApp = {
         this.dom.pillarIcon.className = `fas ${pillar.icon || 'fa-question-circle'}`;
         this.setTheme(pillar.id);
 
+        // Correction navigation directe depuis la roue de la vie
+        let wheelToGoal = null;
+        try {
+            wheelToGoal = JSON.parse(localStorage.getItem('wheel_to_goal') || 'null');
+        } catch (e) { wheelToGoal = null; }
+        if (wheelToGoal && wheelToGoal.pillarId) {
+            const targetIndex = this.pillarsData.findIndex(p => p.id === wheelToGoal.pillarId);
+            if (targetIndex !== -1 && targetIndex !== this.currentPillarIndex) {
+                this.currentPillarIndex = targetIndex;
+                localStorage.setItem('wheel_to_goal', JSON.stringify(wheelToGoal)); // conserver pour le scroll
+                this.renderPillar();
+                return;
+            }
+        }
+
         let contentHTML = '';
         if (Array.isArray(pillar.subPillars) && pillar.subPillars.length > 0) {
             // Pré-remplissage depuis la Roue de la Vie
-            let wheelToGoal = null;
-            try {
-                wheelToGoal = JSON.parse(localStorage.getItem('wheel_to_goal') || 'null');
-            } catch (e) { wheelToGoal = null; }
             pillar.subPillars.forEach(subPillar => {
                  if (!subPillar || !subPillar.id || !subPillar.name) {
                       console.warn(`Skipping invalid subpillar in pillar ${pillar.name}:`, subPillar);
@@ -352,8 +363,26 @@ const GoalsApp = {
                     return `<div class="text-xs text-blue-700 mt-1 mb-1"><i class="fas fa-check-circle mr-1"></i>Progression rituels : ${done}/${linked.length} aujourd’hui</div>`;
                  }
 
+                 // Détermination de la classe d'alerte pour le sous-pilier
+                 let alertClass = '';
+                 for (let i = 0; i < 3; i++) {
+                    if (goals[i] && goals[i].trim() !== '') {
+                        if (!subPillar.linkedRituals || !subPillar.linkedRituals[i]) {
+                            alertClass = 'wheel-sub-pillar--goal';
+                            break;
+                        } else {
+                            alertClass = 'wheel-sub-pillar--goal has-ritual';
+                        }
+                    }
+                 }
+
+                 // Ajout d'un attribut data-pillar-id pour la navigation inverse
+                 let clickableAttr = '';
+                 if (alertClass) {
+                    clickableAttr = 'tabindex="0" style="cursor:pointer;"';
+                 }
                  contentHTML += `
-                    <div class="goals-sous-pilier" data-subpillar-id="${subPillar.id}">
+                    <div class="goals-sous-pilier ${alertClass}" data-subpillar-id="${subPillar.id}" data-pillar-id="${pillar.id}" ${clickableAttr}>
                         <h3>${subPillar.name}</h3>
                         <div class="goals-objectif">
                             <span class="goals-objectif-label">Objectif 1:</span>
@@ -393,6 +422,37 @@ const GoalsApp = {
 
         this.dom.pillarContent.innerHTML = contentHTML;
         this.updateNavButtons();
+
+        // Clic sur alerte : navigation vers la roue de la vie
+        setTimeout(() => {
+            const clickableDivs = this.dom.pillarContent.querySelectorAll('.goals-sous-pilier.wheel-sub-pillar--goal, .goals-sous-pilier.wheel-sub-pillar--goal.has-ritual');
+            clickableDivs.forEach(div => {
+                div.onclick = function () {
+                    const pillarId = div.getAttribute('data-pillar-id');
+                    const subPillarId = div.getAttribute('data-subpillar-id');
+                    const subPillarName = div.querySelector('h3')?.textContent || '';
+                    localStorage.setItem('goal_to_wheel', JSON.stringify({ pillarId, subPillarId, subPillarName }));
+                    if (typeof MainApp !== 'undefined') {
+                        MainApp.showMainApp();
+                        MainApp.showApp('wheel');
+                    }
+                };
+            });
+        }, 0);
+
+        // Scroll automatique vers le sous-pilier ciblé par la roue de la vie
+        try {
+            const wheelToGoal = JSON.parse(localStorage.getItem('wheel_to_goal') || 'null');
+            if (wheelToGoal && wheelToGoal.subPillarId) {
+                const targetDiv = this.dom.pillarContent.querySelector(`.goals-sous-pilier[data-subpillar-id="${wheelToGoal.subPillarId}"]`);
+                if (targetDiv) {
+                    targetDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    targetDiv.classList.add('wheel-sub-pillar--goal'); // Highlight visuel supplémentaire
+                    setTimeout(() => targetDiv.classList.remove('wheel-sub-pillar--goal'), 2000);
+                }
+                localStorage.removeItem('wheel_to_goal');
+            }
+        } catch (e) {}
     },
 
     setTheme: function(pillarId) {

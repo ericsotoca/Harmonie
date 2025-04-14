@@ -32,6 +32,82 @@ const MainApp = {
         else console.error("RitualsApp is not defined. Check js/rituals.js");
 
         console.log("MainApp Initialized.");
+
+        // --- AI Tab: Génération des fichiers et prompts ---
+        setTimeout(() => {
+            const btnWheel = document.getElementById('ai-download-wheel');
+            const btnWheelGoals = document.getElementById('ai-download-wheel-goals');
+            if (btnWheel) {
+                btnWheel.onclick = function () {
+                    let data = {};
+                    if (typeof WheelApp !== 'undefined' && WheelApp.pillars) {
+                        data = { pillars: WheelApp.pillars, history: WheelApp.history || [] };
+                    }
+                    const prompt = `Voici mes données de la Roue de la Vie (équilibre global, historique). Peux-tu m'aider à faire le point sur mes domaines forts/faibles et me suggérer 3 objectifs simples et concrets pour progresser ?\n\nDonnées :\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``;
+                    const blob = new Blob([prompt], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'roue_de_la_vie_prompt.txt';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+                };
+            }
+            const btnCopyWheel = document.getElementById('ai-copy-wheel');
+            if (btnCopyWheel) {
+                btnCopyWheel.onclick = function () {
+                    let data = {};
+                    if (typeof WheelApp !== 'undefined' && WheelApp.pillars) {
+                        data = { pillars: WheelApp.pillars, history: WheelApp.history || [] };
+                    }
+                    const prompt = `Voici mes données de la Roue de la Vie (équilibre global, historique). Peux-tu m'aider à faire le point sur mes domaines forts/faibles et me suggérer 3 objectifs simples et concrets pour progresser ?\n\nDonnées :\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``;
+                    navigator.clipboard.writeText(prompt).then(() => {
+                        btnCopyWheel.textContent = "Copié !";
+                        setTimeout(() => { btnCopyWheel.textContent = "Copier dans le presse-papier"; }, 1500);
+                    });
+                };
+            }
+            if (btnWheelGoals) {
+                btnWheelGoals.onclick = function () {
+                    let data = {};
+                    if (typeof WheelApp !== 'undefined' && typeof GoalsApp !== 'undefined') {
+                        data = {
+                            pillars: WheelApp.pillars,
+                            history: WheelApp.history || [],
+                            goals: GoalsApp.pillarsData
+                        };
+                    }
+                    const prompt = `Voici mes données de la Roue de la Vie et mes Objectifs. Peux-tu m'aider à faire le point sur mes domaines forts/faibles et me suggérer 3 rituels quotidiens personnalisés pour améliorer ma situation ?\n\nDonnées :\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``;
+                    const blob = new Blob([prompt], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'roue_de_la_vie_objectifs_rituels_prompt.txt';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+                };
+            }
+            const btnCopyWheelGoals = document.getElementById('ai-copy-wheel-goals');
+            if (btnCopyWheelGoals) {
+                btnCopyWheelGoals.onclick = function () {
+                    let data = {};
+                    if (typeof WheelApp !== 'undefined' && typeof GoalsApp !== 'undefined') {
+                        data = {
+                            pillars: WheelApp.pillars,
+                            history: WheelApp.history || [],
+                            goals: GoalsApp.pillarsData
+                        };
+                    }
+                    const prompt = `Voici mes données de la Roue de la Vie et mes Objectifs. Peux-tu m'aider à faire le point sur mes domaines forts/faibles et me suggérer 3 rituels quotidiens personnalisés pour améliorer ma situation ?\n\nDonnées :\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``;
+                    navigator.clipboard.writeText(prompt).then(() => {
+                        btnCopyWheelGoals.textContent = "Copié !";
+                        setTimeout(() => { btnCopyWheelGoals.textContent = "Copier dans le presse-papier"; }, 1500);
+                    });
+                };
+            }
+        }, 0);
     },
 
     cacheDomElements: function() {
@@ -49,6 +125,7 @@ const MainApp = {
             wheel: document.getElementById('app-wheel'),
             goals: document.getElementById('app-goals'),
             rituals: document.getElementById('app-rituals'),
+            ai: document.getElementById('app-ai'),
         };
     },
 
@@ -157,8 +234,9 @@ const MainApp = {
             WheelApp.pillars.forEach(pillar => {
                 if (pillar.subPillars) {
                     pillar.subPillars.forEach(sub => {
-                        if (typeof sub.score === 'number' && sub.score <= 5) {
-                            alerts += `<div class="bg-red-100 text-red-700 rounded px-3 py-2 mb-2">
+                        if (typeof sub.score === 'number' && sub.score < 5) {
+                            alerts += `<div class="bg-red-100 text-red-700 rounded px-3 py-2 mb-2 dashboard-alert-link" 
+                                data-pillar-id="${pillar.id}" data-subpillar-id="${sub.id}" style="cursor:pointer;">
                                 <i class="fas fa-exclamation-triangle mr-2"></i>
                                 Domaine faible : <b>${pillar.name} > ${sub.name}</b> (score ${sub.score})
                             </div>`;
@@ -168,6 +246,21 @@ const MainApp = {
             });
         }
         this.dom.dashboardAlerts.innerHTML = alerts || '<div class="text-green-700">Aucun domaine critique détecté.</div>';
+
+        // Ajout navigation sur clic
+        setTimeout(() => {
+            document.querySelectorAll('.dashboard-alert-link').forEach(div => {
+                div.onclick = function () {
+                    const pillarId = div.getAttribute('data-pillar-id');
+                    const subPillarId = div.getAttribute('data-subpillar-id');
+                    localStorage.setItem('goal_to_wheel', JSON.stringify({ pillarId, subPillarId }));
+                    if (typeof MainApp !== 'undefined') {
+                        MainApp.showMainApp();
+                        MainApp.showApp('wheel');
+                    }
+                };
+            });
+        }, 0);
     },
 
     /**

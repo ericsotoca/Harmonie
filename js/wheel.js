@@ -859,9 +859,12 @@ Object.assign(WheelApp, { // Merging methods into the existing WheelApp object
                 const displayGoal = (typeof subPillar.goal === 'number' && !isNaN(subPillar.goal)) ? subPillar.goal : 10;
                 const noteIconColorClass = subPillar.note ? 'wheel-note-active' : ''; // Add class if note exists?
 
-                // Ajout du bouton "Créer un objectif" si score faible
+                // Ajout classe rouge si score < 5
+                const alertClass = displayScore < 5 ? 'wheel-sub-pillar--alert' : '';
+
+                // Ajout du bouton "Créer un objectif" si objectif > score
                 let createGoalBtn = '';
-                if (displayScore <= 5) {
+                if (displayGoal > displayScore) {
                     createGoalBtn = `<button class="wheel-create-goal-btn" data-pillar-id="${pillar.id}" data-subpillar-id="${subPillar.id}" data-subpillar-name="${subPillar.name}" style="margin-left:10px; color:#fff; background:#6366f1; border:none; border-radius:4px; padding:2px 8px; font-size:0.85em; cursor:pointer;">Créer un objectif</button>`;
                 }
                 // Recherche des objectifs liés à ce sous-pilier
@@ -889,13 +892,17 @@ Object.assign(WheelApp, { // Merging methods into the existing WheelApp object
                             <ul class="ml-4 list-disc">
                                 ${goals.map(g => `<li>${g}</li>`).join('')}
                             </ul>
-                            <a href="#" class="underline text-indigo-600 hover:text-indigo-800" onclick="if(typeof MainApp!=='undefined'){MainApp.showMainApp();MainApp.showApp('goals');} return false;">Voir/modifier dans Objectifs</a>
+                            <a href="#" class="underline text-indigo-600 hover:text-indigo-800" onclick="
+                                localStorage.setItem('wheel_to_goal', JSON.stringify({pillarId: '${pillar.id}', subPillarId: '${subPillar.id}', subPillarName: '${subPillar.name}'}));
+                                if(typeof MainApp!=='undefined'){MainApp.showMainApp();MainApp.showApp('goals');}
+                                return false;
+                            ">Voir/modifier dans Objectifs</a>
                         </div>`;
                     }
                 }
 
                 pillarHTML += `
-                    <div class="wheel-sub-pillar" id="wheel-subpillar-div-${subPillar.id}">
+                    <div class="wheel-sub-pillar ${alertClass}" id="wheel-subpillar-div-${subPillar.id}">
                         <div class="wheel-sub-pillar-header">
                             <label for="wheel-range-${subPillar.id}" id="wheel-label-${subPillar.id}">
                                 <span>${subPillar.name}</span>
@@ -918,18 +925,36 @@ Object.assign(WheelApp, { // Merging methods into the existing WheelApp object
                                        onchange="WheelApp.updateGoal('${pillar.id}', '${subPillar.id}', this.value)"
                                        aria-label="Objectif pour ${subPillar.name}">
                             </div>
-                            <div class="wheel-detail-group">
-                                <button class="wheel-note-button ${noteIconColorClass}"
-                                        onclick="WheelApp.openNotePopup('${pillar.id}', '${subPillar.id}')"
-                                        aria-label="Ajouter ou modifier une note pour ${subPillar.name}">
-                                    ${this.noteIconSVG}
-                                </button>
-                            </div>
+                            <!-- Suppression du bouton note (icône crayon) -->
                         </div>
                     </div>`;
             });
         }
         if (this.dom.pillarDisplay) this.dom.pillarDisplay.innerHTML = pillarHTML;
+
+        // Scroll automatique si navigation depuis Objectifs (goal_to_wheel)
+        try {
+            const goalToWheel = JSON.parse(localStorage.getItem('goal_to_wheel') || 'null');
+            if (goalToWheel && goalToWheel.pillarId) {
+                const targetIndex = this.pillars.findIndex(p => p.id === goalToWheel.pillarId);
+                if (targetIndex !== -1 && targetIndex !== this.currentPillarIndex) {
+                    this.currentPillarIndex = targetIndex;
+                    localStorage.setItem('goal_to_wheel', JSON.stringify(goalToWheel)); // conserver pour le scroll
+                    this.renderPillar();
+                    return;
+                }
+                // Scroll sur le sous-pilier
+                setTimeout(() => {
+                    const targetDiv = this.dom.pillarDisplay.querySelector(`#wheel-subpillar-div-${goalToWheel.subPillarId}`);
+                    if (targetDiv) {
+                        targetDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        targetDiv.classList.add('wheel-sub-pillar--alert');
+                        setTimeout(() => targetDiv.classList.remove('wheel-sub-pillar--alert'), 2000);
+                    }
+                    localStorage.removeItem('goal_to_wheel');
+                }, 0);
+            }
+        } catch (e) {}
 
         this.updateNavigationButtons();
         this.updateScoresDisplay(); // Update scores immediately after rendering
