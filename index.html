@@ -50,7 +50,11 @@
     <!-- Tableau de bord synthétique -->
     <div id="dashboard" class="hidden flex-col flex-grow p-6 bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50">
         <h2 class="text-2xl font-bold text-indigo-700 mb-4">Tableau de bord</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="flex flex-wrap gap-4 mb-6">
+            <button id="dashboard-to-wheel" class="bg-indigo-500 text-white px-4 py-2 rounded shadow hover:bg-indigo-700 transition"><i class="fas fa-chart-pie mr-2"></i>Roue de la Vie</button>
+            <button id="dashboard-to-goals" class="bg-purple-500 text-white px-4 py-2 rounded shadow hover:bg-purple-700 transition"><i class="fas fa-bullseye mr-2"></i>Objectifs</button>
+            <button id="dashboard-to-rituals" class="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition"><i class="fas fa-spa mr-2"></i>Rituels</button>
+        </div>
             <div class="bg-white rounded-lg shadow p-4 flex flex-col items-center">
                 <span class="text-lg font-semibold text-gray-600 mb-2">Score global (Roue de la Vie)</span>
                 <span id="dashboard-wheel-score" class="text-3xl font-bold text-indigo-600">-</span>
@@ -65,11 +69,7 @@
             </div>
         </div>
         <div id="dashboard-alerts" class="mt-4"></div>
-        <div class="flex flex-wrap gap-4 mt-8">
-            <button id="dashboard-to-wheel" class="bg-indigo-500 text-white px-4 py-2 rounded shadow hover:bg-indigo-700 transition"><i class="fas fa-chart-pie mr-2"></i>Roue de la Vie</button>
-            <button id="dashboard-to-goals" class="bg-purple-500 text-white px-4 py-2 rounded shadow hover:bg-purple-700 transition"><i class="fas fa-bullseye mr-2"></i>Objectifs</button>
-            <button id="dashboard-to-rituals" class="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition"><i class="fas fa-spa mr-2"></i>Rituels</button>
-        </div>
+        <!-- Les boutons de navigation sont maintenant en haut -->
     </div>
 
     <!-- Contenu Principal de l'Application (Initialement caché) -->
@@ -81,6 +81,7 @@
             <button id="nav-wheel" data-app="wheel" class="active">Roue de la Vie</button>
             <button id="nav-goals" data-app="goals">Objectifs</button>
             <button id="nav-rituals" data-app="rituals">Rituels</button>
+            <button id="nav-ai" data-app="ai">AI</button>
         </nav>
 
         <!-- Conteneurs pour chaque application -->
@@ -94,6 +95,30 @@
 
         <div id="app-rituals" class="app-container hidden flex-grow">
             <!-- Le contenu HTML des Rituels sera injecté ici par rituals.js -->
+        </div>
+        <div id="app-ai" class="app-container hidden flex-grow">
+            <div class="ai-container" style="max-width:600px;margin:40px auto;padding:32px 20px;background:#f8fafc;border-radius:16px;box-shadow:0 4px 24px rgba(60,60,100,0.08);">
+                <h2 style="text-align:center;color:#6366f1;margin-bottom:18px;">Assistant IA – Analyse & Conseils</h2>
+                <p style="text-align:center;color:#475569;margin-bottom:24px;">Téléchargez vos données et un prompt adapté pour obtenir une analyse personnalisée ou des conseils d'un LLM (ChatGPT, Mistral, etc).</p>
+                <div style="display:flex;flex-direction:column;gap:24px;">
+                    <div style="background:#fff;border-radius:10px;padding:18px 14px;box-shadow:0 2px 8px rgba(60,60,100,0.06);">
+                        <h3 style="color:#6366f1;font-size:1.1rem;margin-bottom:8px;">Analyse globale & Conseils Objectifs</h3>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                            <button id="ai-download-wheel" style="background:#6366f1;color:#fff;padding:10px 18px;border-radius:6px;font-weight:600;cursor:pointer;">Télécharger données + prompt</button>
+                            <button id="ai-copy-wheel" style="background:#a5b4fc;color:#333;padding:10px 18px;border-radius:6px;font-weight:600;cursor:pointer;">Copier dans le presse-papier</button>
+                        </div>
+                        <p style="font-size:0.95em;color:#475569;margin-top:8px;">Fichier JSON incluant vos données de la roue de la vie et un prompt pour demander une analyse globale et des pistes d'objectifs à un LLM.</p>
+                    </div>
+                    <div style="background:#fff;border-radius:10px;padding:18px 14px;box-shadow:0 2px 8px rgba(60,60,100,0.06);">
+                        <h3 style="color:#6366f1;font-size:1.1rem;margin-bottom:8px;">Analyse Objectifs & Conseils Rituels</h3>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                            <button id="ai-download-wheel-goals" style="background:#10b981;color:#fff;padding:10px 18px;border-radius:6px;font-weight:600;cursor:pointer;">Télécharger données + prompt</button>
+                            <button id="ai-copy-wheel-goals" style="background:#6ee7b7;color:#333;padding:10px 18px;border-radius:6px;font-weight:600;cursor:pointer;">Copier dans le presse-papier</button>
+                        </div>
+                        <p style="font-size:0.95em;color:#475569;margin-top:8px;">Fichier JSON incluant roue de la vie + objectifs et un prompt pour demander à un LLM des conseils de rituels personnalisés.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
