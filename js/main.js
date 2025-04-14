@@ -143,50 +143,50 @@ const MainApp = {
             const oldBtn = this.dom.dashboard.querySelector('.dashboard-mainapp-btn');
             if (oldBtn) oldBtn.remove();
 
-            // Dashboard navigation shortcuts
+            // Dashboard navigation shortcuts (harmonisé avec la nav principale)
+            const btnDashboard = document.getElementById('dashboard-to-dashboard');
             const btnWheel = document.getElementById('dashboard-to-wheel');
             const btnGoals = document.getElementById('dashboard-to-goals');
             const btnRituals = document.getElementById('dashboard-to-rituals');
+            if (btnDashboard) btnDashboard.onclick = () => { this.showDashboard(); };
             if (btnWheel) btnWheel.onclick = () => { this.showMainApp(); this.showApp('wheel'); };
             if (btnGoals) btnGoals.onclick = () => { this.showMainApp(); this.showApp('goals'); };
             if (btnRituals) btnRituals.onclick = () => { this.showMainApp(); this.showApp('rituals'); };
         }
 
         // Main Navigation Buttons
-        this.dom.navButtons.forEach(button => {
-            button.addEventListener('click', (event) => {
+        // Correction : re-sélectionner tous les boutons à chaque fois (menu unique en haut)
+        document.querySelectorAll('.main-nav button[data-app]').forEach(button => {
+            button.onclick = (event) => {
                 const appName = event.currentTarget.dataset.app;
-                if (appName) {
+                if (appName === "dashboard") {
+                    this.showDashboard();
+                } else if (appName) {
                     this.showApp(appName);
                 }
-            });
+            };
         });
-        // Dashboard nav button
-        const navDashboard = document.getElementById('nav-dashboard');
-        if (navDashboard) {
-            navDashboard.addEventListener('click', () => {
-                this.showDashboard();
-            });
-        }
+        // (Suppression du gestionnaire spécifique dashboard, car géré dans la boucle ci-dessus)
     },
 
     // --- View Management ---
-
-    showLandingPage: function() {
-        if (this.dom.landingPage) this.dom.landingPage.classList.remove('hidden');
-        if (this.dom.dashboard) this.dom.dashboard.classList.add('hidden');
-        if (this.dom.mainAppContent) this.dom.mainAppContent.classList.add('hidden');
-        // Peut-être remettre le focus sur le bouton start si pertinent
-        // if (this.dom.startAppButton) this.dom.startAppButton.focus();
-    },
+showLandingPage: function() {
+    if (this.dom.landingPage) this.dom.landingPage.classList.remove('hidden');
+    if (this.dom.dashboard) this.dom.dashboard.classList.add('hidden');
+    if (this.dom.mainAppContent) this.dom.mainAppContent.classList.add('hidden');
+    // Hide the top navigation menu on the landing page
+    if (this.dom.mainNav) this.dom.mainNav.classList.add('hidden');
+    // Peut-être remettre le focus sur le bouton start si pertinent
+    // if (this.dom.startAppButton) this.dom.startAppButton.focus();
+},
 
     showDashboard: function() {
         if (this.dom.landingPage) this.dom.landingPage.classList.add('hidden');
-        if (this.dom.dashboard) {
-            this.dom.dashboard.classList.remove('hidden');
-            this.fillDashboard();
-        }
-        if (this.dom.mainAppContent) this.dom.mainAppContent.classList.add('hidden');
+        if (this.dom.dashboard) this.dom.dashboard.classList.remove('hidden');
+        if (this.dom.mainAppContent) this.dom.mainAppContent.classList.remove('hidden');
+        // Show the top navigation menu when leaving the landing page
+        if (this.dom.mainNav) this.dom.mainNav.classList.remove('hidden');
+        this.fillDashboard();
         // Active l'onglet dashboard pour la logique d'onglets
         this.showApp('dashboard');
     },
@@ -194,13 +194,12 @@ const MainApp = {
     showMainApp: function() {
         if (this.dom.landingPage) this.dom.landingPage.classList.add('hidden');
         if (this.dom.dashboard) this.dom.dashboard.classList.add('hidden');
-        if (this.dom.mainAppContent) {
-            this.dom.mainAppContent.classList.remove('hidden');
-            // Force le layout flex pour que flex-grow fonctionne
-            this.dom.mainAppContent.style.display = 'flex';
-        }
+        if (this.dom.mainAppContent) this.dom.mainAppContent.classList.remove('hidden');
+        // Show the top navigation menu when leaving the landing page
+        if (this.dom.mainNav) this.dom.mainNav.classList.remove('hidden');
+        // Force le layout flex pour que flex-grow fonctionne
+        if (this.dom.mainAppContent) this.dom.mainAppContent.style.display = 'flex';
         // Show the default or last viewed app
-        // Ensure the first app ('wheel') is rendered *after* main content is visible
         this.showApp(this.currentApp);
     },
 
@@ -283,12 +282,35 @@ const MainApp = {
         this.currentApp = appName;
 
 
-        // Update Navigation Buttons state
+        // Couleurs actives selon la rubrique
+        const colorMap = {
+            dashboard: ['bg-indigo-600', 'hover:bg-indigo-700'],
+            wheel: ['bg-blue-600', 'hover:bg-blue-700'],
+            goals: ['bg-purple-600', 'hover:bg-purple-700'],
+            rituals: ['bg-teal-600', 'hover:bg-teal-700'],
+            ai: ['bg-pink-600', 'hover:bg-pink-700']
+        };
+
         this.dom.navButtons.forEach(button => {
-            if (button.dataset.app === appName) {
-                button.classList.add('active');
+            const btnApp = button.dataset.app;
+            // Retire toutes les couleurs actives potentielles
+            button.classList.remove(
+                'active',
+                'bg-indigo-600', 'hover:bg-indigo-700',
+                'bg-blue-600', 'hover:bg-blue-700',
+                'bg-purple-600', 'hover:bg-purple-700',
+                'bg-teal-600', 'hover:bg-teal-700',
+                'bg-pink-600', 'hover:bg-pink-700',
+                'text-white'
+            );
+            if (btnApp === appName) {
+                button.classList.add('active', 'text-white');
+                const colors = colorMap[appName] || ['bg-indigo-600', 'hover:bg-indigo-700'];
+                button.classList.add(...colors);
+                button.classList.remove('bg-gray-200', 'text-gray-800');
             } else {
-                button.classList.remove('active');
+                button.classList.remove('active', 'text-white');
+                button.classList.add('bg-gray-200', 'text-gray-800');
             }
         });
 
@@ -297,18 +319,13 @@ const MainApp = {
             const container = this.dom.appContainers[key];
             if (container) {
                 if (key === appName) {
-                    if (!container.classList.contains('active')) {
-                        container.classList.add('active');
-                        console.log(`Container ${key} activated.`);
-                    }
-                    // Ensure display is correct (CSS should handle via .active, but double-check)
-                    // container.style.display = ''; // Let CSS handle it via .active class rule
+                    container.classList.add('active');
+                    container.classList.remove('hidden');
+                    console.log(`Container ${key} activated.`);
                 } else {
-                    if (container.classList.contains('active')) {
-                        container.classList.remove('active');
-                        console.log(`Container ${key} deactivated.`);
-                    }
-                    // container.style.display = 'none'; // Let CSS handle it
+                    container.classList.remove('active');
+                    container.classList.add('hidden');
+                    console.log(`Container ${key} deactivated.`);
                 }
             }
         }
@@ -361,12 +378,11 @@ const MainApp = {
                     break;
                 case 'rituals':
                     if (typeof RitualsApp !== 'undefined') {
-                        // RitualsApp uses switchToView which handles rendering the correct content
-                        // Call it with the currently stored view for RitualsApp
-                        RitualsApp.switchToView(RitualsApp.currentView);
-                        console.log(`RitualsApp switched to view '${RitualsApp.currentView}' on activation.`);
+                        // Always show the "Aujourd'hui" tab by default when activating the Rituels app
+                        RitualsApp.switchToView('today');
+                        console.log("RitualsApp switched to view 'today' on activation.");
                     } else {
-                         console.error("RitualsApp not defined during render call.");
+                        console.error("RitualsApp not defined during render call.");
                     }
                     break;
                 default:

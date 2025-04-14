@@ -1,4 +1,4 @@
-Iml<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -29,6 +29,27 @@ Iml<!DOCTYPE html>
 
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
+<!-- Menu principal harmonisé partout -->
+<nav class="main-nav shadow-md flex flex-wrap gap-4 mb-6 justify-center py-4 bg-white bg-opacity-80">
+    <button id="nav-dashboard" data-app="dashboard" class="main-nav-btn flex items-center gap-2">
+        <i class="fas fa-table"></i>Tableau de bord
+    </button>
+    <button id="nav-wheel" data-app="wheel" class="main-nav-btn flex items-center gap-2">
+        <i class="fas fa-chart-pie"></i>Roue de la Vie
+    </button>
+    <button id="nav-goals" data-app="goals" class="main-nav-btn flex items-center gap-2">
+        <i class="fas fa-bullseye"></i>Objectifs
+    </button>
+    <button id="nav-rituals" data-app="rituals" class="main-nav-btn flex items-center gap-2">
+        <i class="fas fa-spa"></i>Rituels
+    </button>
+    <button id="nav-ai" data-app="ai" class="main-nav-btn flex items-center gap-2">
+        <i class="fas fa-robot"></i>AI
+    </button>
+    <button id="toggle-darkmode" class="ml-auto bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 px-3 py-1 rounded transition" title="Basculer mode sombre/clair">
+        <i class="fas fa-moon"></i>
+    </button>
+</nav>
     <!-- Page d'Accueil (Nouvelle) -->
     <div id="landing-page" class="flex-grow flex flex-col items-center justify-center text-center p-8 bg-gradient-to-br from-indigo-100 via-purple-50 to-blue-100">
         <div class="max-w-2xl">
@@ -49,12 +70,7 @@ Iml<!DOCTYPE html>
 
     <!-- Tableau de bord synthétique -->
     <div id="dashboard" class="app-container hidden flex-col flex-grow p-6 bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50">
-        <h2 class="text-2xl font-bold text-indigo-700 mb-4">Tableau de bord</h2>
-        <div class="flex flex-wrap gap-4 mb-6">
-            <button id="dashboard-to-wheel" class="bg-indigo-500 text-white px-4 py-2 rounded shadow hover:bg-indigo-700 transition"><i class="fas fa-chart-pie mr-2"></i>Roue de la Vie</button>
-            <button id="dashboard-to-goals" class="bg-purple-500 text-white px-4 py-2 rounded shadow hover:bg-purple-700 transition"><i class="fas fa-bullseye mr-2"></i>Objectifs</button>
-            <button id="dashboard-to-rituals" class="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition"><i class="fas fa-spa mr-2"></i>Rituels</button>
-        </div>
+        <!-- Menu principal harmonisé partout (dashboard) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div class="bg-white rounded-lg shadow p-4 flex flex-col items-center">
                 <span class="text-lg font-semibold text-gray-600 mb-2">Score global (Roue de la Vie)</span>
@@ -75,18 +91,6 @@ Iml<!DOCTYPE html>
 
     <!-- Contenu Principal de l'Application (Initialement caché) -->
     <div id="main-app-content" class="hidden flex-col flex-grow">
-        <!-- Navigation Principale -->
-<nav class="main-nav shadow-md">
-    <!-- Les boutons seront générés dynamiquement ou copiés plus tard si besoin -->
-    <button id="nav-dashboard" class="dashboard-nav-btn">Tableau de bord</button>
-    <button id="nav-wheel" data-app="wheel" class="active">Roue de la Vie</button>
-    <button id="nav-goals" data-app="goals">Objectifs</button>
-    <button id="nav-rituals" data-app="rituals">Rituels</button>
-    <button id="nav-ai" data-app="ai">AI</button>
-    <button id="toggle-darkmode" class="ml-auto bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 px-3 py-1 rounded transition" title="Basculer mode sombre/clair">
-        <i class="fas fa-moon"></i>
-    </button>
-</nav>
 
         <!-- Conteneurs pour chaque application -->
         <div id="app-wheel" class="app-container active flex-grow">

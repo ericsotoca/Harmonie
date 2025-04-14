@@ -177,6 +177,11 @@ body {
     padding-bottom: 0 !important;
 }
 /* Masquer dashboard si hidden */
+/* Utilitaire global pour masquer n'importe quel élément */
+.hidden {
+    display: none !important;
+}
+
 #dashboard.hidden {
     display: none !important;
 }
