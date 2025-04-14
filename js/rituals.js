@@ -55,8 +55,6 @@ const RitualsApp = {
             <div class="container mx-auto px-4 py-8 max-w-6xl">
                 <!-- Header -->
                 <header class="mb-8 text-center">
-                    <h1 class="text-3xl sm:text-4xl font-bold text-indigo-600 mb-2">Rituels Quotidiens</h1>
-                    <p class="text-md sm:text-lg text-gray-600">Transformez votre routine en habitudes puissantes</p>
                     <div class="mt-4 flex flex-col sm:flex-row justify-center items-center space-y-1 sm:space-y-0 sm:space-x-4">
                         <span id="rituals-current-date" class="text-gray-700 font-medium text-sm sm:text-base"></span>
                         <span id="rituals-streak-count" class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs sm:text-sm font-medium"></span>
@@ -66,7 +64,7 @@ const RitualsApp = {
                 <!-- Main Content -->
                 <main>
                     <!-- Tabs Navigation -->
-                    <div class="flex justify-center border-b border-gray-200 mb-6 overflow-x-auto">
+                    <div class="flex justify-center mb-6 overflow-x-auto">
                         <button id="rituals-today-tab" data-view="today" class="rituals-tab-button px-3 sm:px-4 py-2 font-medium whitespace-nowrap">Aujourd'hui</button>
                         <button id="rituals-history-tab" data-view="history" class="rituals-tab-button px-3 sm:px-4 py-2 font-medium whitespace-nowrap">Historique</button>
                         <button id="rituals-stats-tab" data-view="stats" class="rituals-tab-button px-3 sm:px-4 py-2 font-medium whitespace-nowrap">Statistiques</button>
@@ -595,7 +593,8 @@ const RitualsApp = {
 
     // --- View Switching & Rendering ---
     switchToView: function(viewName) {
-        if (!viewName || this.currentView === viewName) return; // Do nothing if same view
+        console.log(`[DEBUG] RitualsApp.switchToView called with viewName="${viewName}", currentView="${this.currentView}"`);
+        if (!viewName) return;
         this.currentView = viewName;
         console.log(`RitualsApp: Switching to view ${viewName}`);
 
@@ -628,6 +627,7 @@ const RitualsApp = {
                 }
                 // Rendu uniquement si les données sont prêtes
                 if (this.isReady && typeof this.renderTodayView === 'function') {
+                    console.log('[DEBUG] RitualsApp: Rendering Today View');
                     this.renderTodayView();
                 }
                 break;
