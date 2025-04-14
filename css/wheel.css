@@ -189,6 +189,36 @@
     background-color: var(--wheel-bg-color);
     transition: background-color 0.3s;
 }
+
+/* Objectifs : rouge si pas de rituel, vert sinon */
+#app-wheel .wheel-sub-pillar--goal {
+    border-color: var(--wheel-danger-color);
+    background-color: #ffeaea;
+    box-shadow: 0 0 0 2px var(--wheel-danger-color) inset;
+    animation: wheelAlertPulse 1.2s infinite alternate;
+}
+#app-wheel .wheel-sub-pillar--goal.has-ritual {
+    border-color: var(--wheel-goal-border-color);
+    background-color: var(--wheel-goal-bg-color);
+    box-shadow: none;
+    animation: none;
+}
+@keyframes wheelAlertPulse {
+    from { box-shadow: 0 0 0 2px var(--wheel-danger-color) inset; }
+    to   { box-shadow: 0 0 0 6px #ffeaea inset; }
+}
+
+/* Alerte : score < 5 */
+#app-wheel .wheel-sub-pillar--alert {
+    border-color: var(--wheel-danger-color);
+    background-color: #ffeaea;
+    box-shadow: 0 0 0 2px var(--wheel-danger-color) inset;
+    animation: wheelAlertPulse 1.2s infinite alternate;
+}
+@keyframes wheelAlertPulse {
+    from { box-shadow: 0 0 0 2px var(--wheel-danger-color) inset; }
+    to   { box-shadow: 0 0 0 6px #ffeaea inset; }
+}
 #app-wheel .wheel-sub-pillar-header {
     display: flex;
     align-items: center;

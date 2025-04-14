@@ -129,3 +129,19 @@ body {
 #main-app-content.flex-col .app-container.active {
     flex-grow: 1;
 }
+
+/* ========================================= */
+/* == Correction Marge Bas Dashboard == */
+/* ========================================= */
+#dashboard {
+    flex-grow: 0 !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+body {
+    padding-bottom: 0 !important;
+}
+/* Masquer dashboard si hidden */
+#dashboard.hidden {
+    display: none !important;
+}
