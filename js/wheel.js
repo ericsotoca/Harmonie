@@ -217,7 +217,7 @@ const WheelApp = {
         container.innerHTML = `
             <!-- Welcome View -->
             <div id="wheel-welcomeView" class="wheel-main-view" style="display: none;">
-                <img src="assets/logo-placeholder.png" alt="La Roue de la Vie Interactive" class="wheel-logo" id="wheel-appLogo"> <!-- Placeholder logo -->
+<span class="wheel-logo" id="wheel-appLogo" style="font-size:2.5rem;color:#6366f1;"><i class="fas fa-chart-pie"></i></span>
                 <h2>Bienvenue sur la Roue de la Vie Interactive !</h2>
                 <p style="text-align: center; font-size: 1.1em; color: var(--wheel-secondary-text-color); margin-bottom: 25px;">
                     Prenez de la hauteur et redécouvrez votre équilibre global.

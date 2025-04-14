@@ -17,6 +17,42 @@
     color: var(--goals-color-text);
     padding: 1rem;
 }
+/* Mode sombre pour #app-goals */
+.dark #app-goals {
+    --goals-color-text: #f3f4f6;
+    --goals-color-bg: #18181b;
+    --goals-color-primary: #818cf8;
+    --goals-color-light-gray: #27272a;
+    --goals-color-white: #27272a;
+    background-color: var(--goals-color-bg) !important;
+    color: var(--goals-color-text) !important;
+}
+.dark #app-goals #goals-welcome-screen,
+.dark #app-goals #goals-app-content {
+    background-color: var(--goals-color-white) !important;
+    color: var(--goals-color-text) !important;
+}
+.dark #app-goals #goals-pillar-header {
+    background-color: var(--goals-color-primary) !important;
+    color: #fff !important;
+}
+.dark #app-goals .goals-sous-pilier {
+    background-color: #23232b !important;
+    border-left-color: var(--goals-color-primary) !important;
+}
+.dark #app-goals .goals-sous-pilier h3 {
+    color: var(--goals-color-primary) !important;
+}
+.dark #app-goals .goals-objectif input {
+    background-color: #23232b !important;
+    color: #f3f4f6 !important;
+    border-color: #444 !important;
+}
+.dark #app-goals #goals-popup {
+    background: #23232b !important;
+    color: #f3f4f6 !important;
+    border-color: #444 !important;
+}
 
 /* --- Thèmes de couleurs pour les piliers --- */
 #app-goals[data-theme="sante"] { --goals-color-primary: #FF6347; }

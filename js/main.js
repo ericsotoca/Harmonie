@@ -378,6 +378,30 @@ const MainApp = {
 
 }; // End of MainApp object
 
+/* === Mode Sombre/Clair === */
+function applyDarkModeSetting() {
+    const dark = localStorage.getItem('harmonie_darkmode');
+    if (dark === 'true') {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+}
+document.addEventListener('DOMContentLoaded', () => {
+    applyDarkModeSetting();
+    const btn = document.getElementById('toggle-darkmode');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('harmonie_darkmode', isDark ? 'true' : 'false');
+            btn.querySelector('i').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        });
+        // Set correct icon on load
+        btn.querySelector('i').className = (localStorage.getItem('harmonie_darkmode') === 'true') ? 'fas fa-sun' : 'fas fa-moon';
+    }
+});
+
+/* === Initialisation principale === */
 // Initialize the main application when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
     MainApp.init();

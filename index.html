@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+Iml<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -76,14 +76,17 @@
     <!-- Contenu Principal de l'Application (Initialement caché) -->
     <div id="main-app-content" class="hidden flex-col flex-grow">
         <!-- Navigation Principale -->
-        <nav class="main-nav shadow-md">
-            <!-- Les boutons seront générés dynamiquement ou copiés plus tard si besoin -->
-            <button id="nav-dashboard" class="dashboard-nav-btn">Tableau de bord</button>
-            <button id="nav-wheel" data-app="wheel" class="active">Roue de la Vie</button>
-            <button id="nav-goals" data-app="goals">Objectifs</button>
-            <button id="nav-rituals" data-app="rituals">Rituels</button>
-            <button id="nav-ai" data-app="ai">AI</button>
-        </nav>
+<nav class="main-nav shadow-md">
+    <!-- Les boutons seront générés dynamiquement ou copiés plus tard si besoin -->
+    <button id="nav-dashboard" class="dashboard-nav-btn">Tableau de bord</button>
+    <button id="nav-wheel" data-app="wheel" class="active">Roue de la Vie</button>
+    <button id="nav-goals" data-app="goals">Objectifs</button>
+    <button id="nav-rituals" data-app="rituals">Rituels</button>
+    <button id="nav-ai" data-app="ai">AI</button>
+    <button id="toggle-darkmode" class="ml-auto bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 px-3 py-1 rounded transition" title="Basculer mode sombre/clair">
+        <i class="fas fa-moon"></i>
+    </button>
+</nav>
 
         <!-- Conteneurs pour chaque application -->
         <div id="app-wheel" class="app-container active flex-grow">
@@ -130,5 +133,15 @@
     <script src="js/rituals.js" defer></script>
     <script src="js/main.js" defer></script> <!-- Main doit être chargé en dernier ou gérer l'init après les autres -->
 
+<script>
+// Enregistrement du service worker pour le mode hors connexion
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(reg => console.log('Service Worker enregistré', reg))
+      .catch(err => console.warn('Erreur Service Worker', err));
+  });
+}
+</script>
 </body>
 </html>
