@@ -242,15 +242,7 @@ const WheelApp = {
 
             <!-- Input View (Main evaluation area) -->
             <div id="wheel-inputView" class="wheel-main-view" style="display: none;">
-                <!-- Theme Switch -->
-                <div class="wheel-theme-switch-wrapper">
-                    <span aria-hidden="true">☀️</span>
-                    <label class="wheel-theme-switch" for="wheel-theme-checkbox">
-                        <input type="checkbox" id="wheel-theme-checkbox" aria-label="Changer de thème (clair/sombre)">
-                        <span class="wheel-slider round"></span>
-                    </label>
-                    <span aria-hidden="true">🌙</span>
-                </div>
+                <!-- Theme Switch supprimé -->
 
                 <div id="wheel-pillarNavigation" class="wheel-pillar-nav" role="navigation" aria-label="Navigation entre les piliers">
                     <!-- Pillar nav buttons added by JS -->
@@ -817,16 +809,55 @@ Object.assign(WheelApp, { // Merging methods into the existing WheelApp object
         const pillar = this.pillars[this.currentPillarIndex];
         this.updatePillarBorderColor(); // Update border color based on current pillar and theme
 
+        // Icônes pour chaque pilier
+        const pillarIcons = {
+            "sante": "fa-heartbeat",
+            "famille": "fa-users",
+            "finances": "fa-coins",
+            "carriere": "fa-briefcase",
+            "loisirs": "fa-gamepad",
+            "devperso": "fa-brain",
+            "relations": "fa-user-friends",
+            "cadrevie": "fa-home"
+        };
+
         // Render Pillar Navigation Tabs
         if (this.dom.pillarNavigation) {
-            this.dom.pillarNavigation.innerHTML = this.pillars.map((p, idx) => `
-                <button class="wheel-pillar-nav-button ${idx === this.currentPillarIndex ? 'active' : ''}"
+            this.dom.pillarNavigation.innerHTML = this.pillars.map((p, idx) => {
+                const icon = pillarIcons[p.id] || "fa-circle";
+                return `<button class="wheel-pillar-nav-button ${idx === this.currentPillarIndex ? 'active' : ''}"
                         onclick="WheelApp.navigateToPillar(${idx})"
                         aria-label="Aller au pilier ${p.name}"
-                        aria-current="${idx === this.currentPillarIndex ? 'true' : 'false'}">
-                    ${p.name}
-                </button>
-            `).join('');
+                        aria-current="${idx === this.currentPillarIndex ? 'true' : 'false'}"
+                        title="${p.name}">
+                        <i class="fas ${icon}" aria-hidden="true"></i>
+                    </button>`;
+            }).join('');
+        }
+
+        // Affichage des alertes domaines faibles juste sous les onglets
+        if (this.dom.pillarNavigation) {
+            let alerts = '';
+            const currentPillar = this.pillars[this.currentPillarIndex];
+            if (currentPillar && currentPillar.subPillars) {
+                currentPillar.subPillars.forEach(sub => {
+                    if (typeof sub.score === 'number' && sub.score < 5) {
+                        alerts += `<div class="wheel-alert-low bg-red-100 text-red-700 rounded px-3 py-2 mb-2" style="margin-top:8px;">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Domaine faible : <b>${currentPillar.name} > ${sub.name}</b> (score ${sub.score})
+                        </div>`;
+                    }
+                });
+            }
+            // Supprimer l'ancien bloc si présent
+            const old = this.dom.pillarNavigation.parentElement.querySelector('.wheel-alerts-low-block');
+            if (old) old.remove();
+            if (alerts) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'wheel-alerts-low-block';
+                alertDiv.innerHTML = alerts;
+                this.dom.pillarNavigation.insertAdjacentElement('afterend', alertDiv);
+            }
         }
 
         // Function to create tooltip HTML safely

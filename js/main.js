@@ -122,6 +122,7 @@ const MainApp = {
         this.dom.mainNav = document.querySelector('.main-nav');
         this.dom.navButtons = this.dom.mainNav ? this.dom.mainNav.querySelectorAll('button[data-app]') : [];
         this.dom.appContainers = {
+            dashboard: document.getElementById('dashboard'),
             wheel: document.getElementById('app-wheel'),
             goals: document.getElementById('app-goals'),
             rituals: document.getElementById('app-rituals'),
@@ -138,11 +139,9 @@ const MainApp = {
         }
         // Dashboard: add a button to enter the main app
         if (this.dom.dashboard) {
-            let btn = document.createElement('button');
-            btn.textContent = "Accéder à l'application complète";
-            btn.className = "mt-6 bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold text-lg shadow hover:bg-indigo-700 transition";
-            btn.onclick = () => this.showMainApp();
-            this.dom.dashboard.appendChild(btn);
+            // Suppression du bouton "Accéder à l'application complète" s'il existe déjà
+            const oldBtn = this.dom.dashboard.querySelector('.dashboard-mainapp-btn');
+            if (oldBtn) oldBtn.remove();
 
             // Dashboard navigation shortcuts
             const btnWheel = document.getElementById('dashboard-to-wheel');
@@ -188,6 +187,8 @@ const MainApp = {
             this.fillDashboard();
         }
         if (this.dom.mainAppContent) this.dom.mainAppContent.classList.add('hidden');
+        // Active l'onglet dashboard pour la logique d'onglets
+        this.showApp('dashboard');
     },
 
     showMainApp: function() {
