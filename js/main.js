@@ -61,7 +61,7 @@ const MainApp = {
                     if (typeof WheelApp !== 'undefined' && WheelApp.pillars) {
                         data = { pillars: WheelApp.pillars, history: WheelApp.history || [] };
                     }
-                    const prompt = `Voici mes données de la Roue de la Vie (équilibre global, historique). Peux-tu m'aider à faire le point sur mes domaines forts/faibles et me suggérer 3 objectifs simples et concrets pour progresser ?\n\nDonnées :\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``;
+                    const prompt = `Je souhaite analyser mes données de la Roue de la Vie pour identifier mes domaines forts et faibles. Pour chaque domaine où mon goal est supérieur à mon score, je veux des suggestions de 3 actions concrètes et des rituels quotidiens pour m aider à progresser.\n\nDonnées :\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``;
                     navigator.clipboard.writeText(prompt).then(() => {
                         btnCopyWheel.textContent = "Copié !";
                         setTimeout(() => { btnCopyWheel.textContent = "Copier dans le presse-papier"; }, 1500);
